@@ -7,8 +7,8 @@ WORKDIR /app
 RUN apk add --no-cache git
 
 # Copy go.mod and source code
-COPY relay/go.mod ./
-COPY relay/main.go ./
+# Copy source code
+COPY relay/ ./
 
 # Generate go.sum and download dependencies
 RUN go mod tidy && go mod download
