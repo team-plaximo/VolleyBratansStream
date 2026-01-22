@@ -55,6 +55,9 @@ services:
     depends_on:
       - relay
       - web
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - volleybratans-network
 
