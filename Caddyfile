@@ -1,6 +1,10 @@
 # VolleyBratans Stream Platform - Caddyfile
 # Auto-SSL reverse proxy configuration
 
+{
+    email stream@volleybratans.com
+}
+
 # Production domain
 # Production domain
 stream.volleybratans.com {
