@@ -1957,12 +1957,21 @@ class ScoutEngine {
 
 // Initialize Scout Engine when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.scoutEngine = new ScoutEngine();
+    // Lazy initialization - only create when statistics page is visited
+    window.scoutEngine = null;
 });
 
-// Re-initialize when navigating to statistics page (for SPA navigation)
+// Singleton pattern: Initialize once, reuse on subsequent navigations
 document.addEventListener('pageChanged', (e) => {
     if (e.detail?.page === 'statistics') {
-        window.scoutEngine = new ScoutEngine();
+        if (!window.scoutEngine) {
+            // First time: create and initialize
+            window.scoutEngine = new ScoutEngine();
+        } else {
+            // Already initialized: just refresh the view
+            window.scoutEngine.render();
+            window.scoutEngine.updateQuickIndicator();
+        }
     }
 });
+
