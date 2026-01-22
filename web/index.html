@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="VolleyBratans Stream Control Platform - Unified dashboard for camera control, match statistics, and stream management">
+    <meta name="keywords" content="volleyball, streaming, remote control, live streaming, mobile streaming, sports">
+    <meta name="author" content="VolleyBratans">
+    <title>VolleyBratans Stream Platform</title>
+    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <!-- Top Navigation Bar -->
+        <nav class="top-nav" id="topNav">
+            <div class="nav-brand">
+                <svg class="nav-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                </svg>
+                <span class="nav-title">VolleyBratans</span>
+            </div>
+            <div class="nav-links">
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="9" />
+                        <rect x="14" y="3" width="7" height="5" />
+                        <rect x="14" y="12" width="7" height="9" />
+                        <rect x="3" y="16" width="7" height="5" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#cameras" class="nav-link" data-page="cameras">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Cameras</span>
+                </a>
+                <a href="#statistics" class="nav-link" data-page="statistics">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                    <span>Statistics</span>
+                </a>
+                <a href="#overlays" class="nav-link" data-page="overlays">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    <span>Overlays</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                <div class="nav-status" id="navConnectionStatus">
+                    <span class="status-dot status-disconnected" id="navStatusDot"></span>
+                    <span class="nav-status-text" id="navStatusText">Offline</span>
+                </div>
+                <!-- Theme Toggle -->
+                <button class="nav-theme-btn" id="themeToggle" title="Toggle Theme">
+                    <svg class="icon-sm theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="icon-sm theme-icon-light hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <button class="nav-settings-btn" id="navSettingsBtn" title="Settings">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContent">
+            <!-- Page: Dashboard -->
+            <section class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Stream Control Center</p>
+                </div>
+
+                <!-- Quick Status Cards -->
+                <div class="dashboard-stats-grid">
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="dashboard-stat-info">
+                            <span class="dashboard-stat-value" id="dashCameraCount">0</span>
+                            <span class="dashboard-stat-label">Cameras Connected</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-icon dashboard-stat-icon-live">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="4" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div class="dashboard-stat-info">
+                            <span class="dashboard-stat-value" id="dashLiveCount">0</span>
+                            <span class="dashboard-stat-label">Streams Live</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-icon dashboard-stat-icon-match">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 6v6l4 2" />
+                            </svg>
+                        </div>
+                        <div class="dashboard-stat-info">
+                            <span class="dashboard-stat-value" id="dashMatchStatus">--</span>
+                            <span class="dashboard-stat-label">Match Status</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-icon dashboard-stat-icon-viewers">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </div>
+                        <div class="dashboard-stat-info">
+                            <span class="dashboard-stat-value" id="dashViewerCount">0</span>
+                            <span class="dashboard-stat-label">Total Viewers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-section">
+                    <h2 class="dashboard-section-title">Quick Actions</h2>
+                    <div class="dashboard-actions-grid">
+                        <button class="dashboard-action-btn" id="dashGoLiveAll">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            <span>Go Live All</span>
+                        </button>
+                        <button class="dashboard-action-btn dashboard-action-btn-danger hidden" id="dashEndAll">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="6" width="12" height="12" rx="2" />
+                            </svg>
+                            <span>End All Streams</span>
+                        </button>
+                        <button class="dashboard-action-btn" id="dashRecordAll">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="4" fill="currentColor" />
+                            </svg>
+                            <span>Record All</span>
+                        </button>
+                        <button class="dashboard-action-btn" data-navigate="statistics">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 20V10M12 20V4M6 20v-6" />
+                            </svg>
+                            <span>Update Score</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Camera Preview Grid -->
+                <div class="dashboard-section">
+                    <div class="dashboard-section-header">
+                        <h2 class="dashboard-section-title">Camera Overview</h2>
+                        <a href="#cameras" class="dashboard-section-link" data-navigate="cameras">View All →</a>
+                    </div>
+                    <div class="dashboard-camera-grid" id="dashCameraGrid">
+                        <!-- Camera mini-cards injected by JS -->
+                        <div class="dashboard-camera-empty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path
+                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <p>No cameras connected</p>
+                            <button class="btn-primary-sm" data-navigate="cameras">Add Camera</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Score Widget -->
+                <div class="dashboard-section">
+                    <div class="dashboard-section-header">
+                        <h2 class="dashboard-section-title">Live Score</h2>
+                        <a href="#statistics" class="dashboard-section-link" data-navigate="statistics">Edit Score →</a>
+                    </div>
+                    <div class="dashboard-scoreboard" id="dashScoreboard">
+                        <div class="scoreboard-team scoreboard-team-home">
+                            <span class="scoreboard-team-name" id="scoreTeamHome">Home</span>
+                            <span class="scoreboard-team-score" id="scoreHome">0</span>
+                        </div>
+                        <div class="scoreboard-divider">
+                            <span class="scoreboard-set" id="scoreSet">Set 1</span>
+                            <span class="scoreboard-vs">vs</span>
+                        </div>
+                        <div class="scoreboard-team scoreboard-team-away">
+                            <span class="scoreboard-team-name" id="scoreTeamAway">Away</span>
+                            <span class="scoreboard-team-score" id="scoreAway">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Cameras (moved from old index.html) -->
+            <section class="page" id="page-cameras">
+                <div class="page-header">
+                    <h1 class="page-title">Camera Control</h1>
+                    <p class="page-subtitle">Moblin Remote Control Interface</p>
+                </div>
+
+                <!-- Content will be populated by legacy camera control code -->
+                <div id="cameraControlContent">
+                    <!-- View Mode Toggle -->
+                    <div class="view-toggle" id="viewToggle">
+                        <button class="view-btn active" data-view="single">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                            </svg>
+                            Single
+                        </button>
+                        <button class="view-btn" data-view="multi">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                            Multi
+                        </button>
+                    </div>
+
+                    <!-- Master Control Bar (Multi-Device Mode) -->
+                    <section class="master-control-bar hidden" id="masterControlBar">
+                        <div class="master-status">
+                            <span class="master-device-count" id="masterDeviceCount">0 Devices Connected</span>
+                            <span class="master-live-count hidden" id="masterLiveCount">0 Live</span>
+                        </div>
+                        <div class="master-actions">
+                            <button class="master-btn" id="masterRecordAll">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="4" fill="currentColor" />
+                                </svg>
+                                Record All
+                            </button>
+                            <button class="master-btn master-btn-live" id="masterGoLiveAll">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                                Go Live All
+                            </button>
+                            <button class="master-btn master-btn-danger hidden" id="masterEndAll">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                </svg>
+                                End All
+                            </button>
+                            <button class="master-btn" id="masterSyncScene">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                    <path d="M3 3v5h5" />
+                                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                                    <path d="M16 21h5v-5" />
+                                </svg>
+                                Sync Scene
+                            </button>
+                            <button class="master-btn" id="masterMuteAll">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="m2 2 20 20" />
+                                    <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+                                    <path d="M5 10v2a7 7 0 0 0 12 5" />
+                                    <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
+                                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+                                    <line x1="12" y1="19" x2="12" y2="22" />
+                                </svg>
+                                Mute All
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Device Grid (Multi-Device Mode) -->
+                    <section class="device-grid-section hidden" id="deviceGridSection">
+                        <div class="device-grid" id="deviceGrid">
+                            <!-- Device cards rendered dynamically by UIController -->
+                        </div>
+                    </section>
+
+                    <!-- Profile Selector -->
+                    <section class="profile-section">
+                        <button class="profile-btn" id="profileBtn">
+                            <div class="profile-btn-left">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <div class="profile-btn-text">
+                                    <span class="profile-label">Select Profile</span>
+                                    <span class="profile-name" id="profileName">No profile selected</span>
+                                </div>
+                            </div>
+                            <svg class="icon chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-header">
+                                <span>Saved Profiles</span>
+                                <button class="add-profile-btn" id="addProfileBtn">
+                                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M12 5v14M5 12h14" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="profile-list" id="profileList">
+                                <p class="no-profiles">No profiles yet. Add one to get started.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Connection Status -->
+                    <section class="connection-section">
+                        <div class="connection-card">
+                            <div class="connection-left">
+                                <div class="status-dot status-disconnected" id="statusDot"></div>
+                                <svg class="icon status-icon" id="statusIcon" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20h.01" />
+                                    <path d="M8.5 16.429a5 5 0 0 1 7 0" />
+                                    <path d="M5 12.859a10 10 0 0 1 5.17-2.69" />
+                                    <path d="M19 12.859a10 10 0 0 0-2.007-1.523" />
+                                    <path d="M2 8.82a15 15 0 0 1 4.177-2.643" />
+                                    <path d="M22 8.82a15 15 0 0 0-11.288-3.764" />
+                                    <path d="m2 2 20 20" />
+                                </svg>
+                                <span class="status-text status-text-disconnected" id="statusText">Disconnected</span>
+                            </div>
+                            <button class="connect-btn" id="connectBtn">Connect</button>
+                        </div>
+                    </section>
+
+                    <!-- Stream Controls (hidden until connected) -->
+                    <section class="controls-section hidden" id="controlsSection">
+                        <!-- Live Stats -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-label">Bitrate</span>
+                                <span class="stat-value" id="statBitrate">-- kbps</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">FPS</span>
+                                <span class="stat-value" id="statFps">--</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">Battery</span>
+                                <span class="stat-value" id="statBattery">--%</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">Viewers</span>
+                                <span class="stat-value" id="statViewers">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Thermal Status -->
+                        <div class="thermal-card thermal-fair" id="thermalCard">
+                            <div class="thermal-icon">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" />
+                                </svg>
+                            </div>
+                            <div class="thermal-info">
+                                <span class="thermal-label">Device Temperature</span>
+                                <span class="thermal-value" id="thermalValue">Cool</span>
+                            </div>
+                        </div>
+
+                        <!-- Network Status (Upload Stats) -->
+                        <div class="control-card">
+                            <h3 class="control-title">Network Status</h3>
+                            <div class="interface-grid">
+                                <div class="interface-card" id="lteStats">
+                                    <span class="interface-name">
+                                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4v16" />
+                                        </svg>
+                                        LTE
+                                    </span>
+                                    <span class="interface-value" id="lteKbps">-- kbps</span>
+                                    <span class="interface-rtt" id="lteRtt">RTT: --ms</span>
+                                </div>
+                                <div class="interface-card" id="wifiStats">
+                                    <span class="interface-name">
+                                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path
+                                                d="M12 20h.01M8.5 16.429a5 5 0 0 1 7 0M5 12.859a10 10 0 0 1 14 0M1.5 9.287a15 15 0 0 1 21 0" />
+                                        </svg>
+                                        WiFi
+                                    </span>
+                                    <span class="interface-value" id="wifiKbps">-- kbps</span>
+                                    <span class="interface-rtt" id="wifiRtt">RTT: --ms</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="control-card">
+                            <h3 class="control-title">Quick Actions</h3>
+                            <div class="quick-actions-grid" id="quickActionsGrid">
+                                <button class="quick-btn" id="micBtn" data-action="toggle_mic">
+                                    <span class="quick-icon">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                                            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3" />
+                                        </svg>
+                                    </span>
+                                    <span class="quick-label">Mic</span>
+                                </button>
+                                <button class="quick-btn" id="torchBtn" data-action="toggle_torch">
+                                    <span class="quick-icon">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path
+                                                d="M18 6c0-2-2-2-2-4H8c0 2-2 2-2 4l2 4h0v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V10l2-4z" />
+                                            <line x1="12" y1="12" x2="12" y2="12.01" />
+                                        </svg>
+                                    </span>
+                                    <span class="quick-label">Torch</span>
+                                </button>
+                                <button class="quick-btn" id="snapshotBtn" data-action="snapshot">
+                                    <span class="quick-icon">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path
+                                                d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                                            <circle cx="12" cy="13" r="3" />
+                                        </svg>
+                                    </span>
+                                    <span class="quick-label">Snap</span>
+                                </button>
+                                <button class="quick-btn" id="brbBtn" data-action="set_scene" data-value="BRB">
+                                    <span class="quick-icon">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <rect x="6" y="4" width="4" height="16" rx="1" />
+                                            <rect x="14" y="4" width="4" height="16" rx="1" />
+                                        </svg>
+                                    </span>
+                                    <span class="quick-label">BRB</span>
+                                </button>
+                                <button class="quick-btn" id="recordBtn" data-action="toggle_recording">
+                                    <span class="quick-icon">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <circle cx="12" cy="12" r="4" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="quick-label">Record</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Scene Selector -->
+                        <div class="control-card">
+                            <h3 class="control-title">Camera Scene</h3>
+                            <div class="scene-grid" id="sceneGrid">
+                                <button class="scene-btn active" data-scene="main">Main</button>
+                                <button class="scene-btn" data-scene="wide">Wide</button>
+                                <button class="scene-btn" data-scene="closeup">Close-up</button>
+                                <button class="scene-btn" data-scene="pip">PiP</button>
+                                <button class="scene-btn" data-scene="court_overview">Court Overview</button>
+                                <button class="scene-btn" data-scene="scoreboard">Scoreboard</button>
+                                <button class="scene-btn" data-scene="interview">Interview</button>
+                                <button class="scene-btn" data-scene="replay">Replay</button>
+                            </div>
+                        </div>
+
+                        <!-- Bitrate Slider -->
+                        <div class="control-card">
+                            <div class="control-header">
+                                <h3 class="control-title">Bitrate</h3>
+                                <span class="control-value" id="bitrateValue">6000 kbps</span>
+                            </div>
+                            <input type="range" class="slider" id="bitrateSlider" min="1000" max="15000" value="6000"
+                                step="500">
+                        </div>
+
+                        <!-- Zoom Slider -->
+                        <div class="control-card">
+                            <div class="control-header">
+                                <h3 class="control-title">Zoom</h3>
+                                <span class="control-value" id="zoomValue">1.0x</span>
+                            </div>
+                            <input type="range" class="slider" id="zoomSlider" min="1" max="5" value="1" step="0.1">
+                        </div>
+
+                        <!-- Stream Actions -->
+                        <div class="action-buttons">
+                            <button class="action-btn action-btn-live" id="goLiveBtn">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                </svg>
+                                Go Live
+                            </button>
+                            <button class="action-btn action-btn-end hidden" id="endStreamBtn">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                </svg>
+                                End Stream
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- Page: Statistics -->
+            <section class="page" id="page-statistics">
+                <div class="page-header">
+                    <h1 class="page-title">Live Scout</h1>
+                    <p class="page-subtitle">Volleyball Team Statistik</p>
+                </div>
+
+                <!-- Match Header -->
+                <div class="scout-match-header">
+                    <div class="scout-match-info">
+                        <input type="text" class="scout-match-input" id="scoutMatchName"
+                            placeholder="Spiel: z.B. TSG Tübingen vs Mads">
+                        <span class="scout-match-date" id="scoutMatchDate"></span>
+                    </div>
+                    <div class="scout-match-actions">
+                        <button class="scout-btn-action" id="scoutAddPlayer">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="8.5" cy="7" r="4" />
+                                <line x1="20" y1="8" x2="20" y2="14" />
+                                <line x1="23" y1="11" x2="17" y2="11" />
+                            </svg>
+                            Spieler
+                        </button>
+                        <button class="scout-btn-action scout-btn-secondary" id="scoutNewMatch">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            Neues Spiel
+                        </button>
+                        <button class="scout-btn-action scout-btn-secondary" id="scoutHelp">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                            Hilfe
+                        </button>
+                        <button class="scout-btn-action scout-btn-secondary" id="scoutExport">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scout Legend -->
+                <div class="scout-legend">
+                    <span class="scout-legend-title">Bewertung:</span>
+                    <span class="scout-legend-item"><span class="scout-score-badge scout-score-3">3</span>
+                        Perfekt</span>
+                    <span class="scout-legend-item"><span class="scout-score-badge scout-score-2">2</span> Gut</span>
+                    <span class="scout-legend-item"><span class="scout-score-badge scout-score-1">1</span> Ohne
+                        Wirkung</span>
+                    <span class="scout-legend-item"><span class="scout-score-badge scout-score-0">0</span> Fehler</span>
+                </div>
+
+                <!-- Keyboard Legend -->
+                <div class="scout-keyboard-legend">
+                    <span class="scout-legend-title">Tastatur:</span>
+                    <span class="scout-legend-item"><kbd>1-9</kbd> Spieler</span>
+                    <span class="scout-legend-item"><kbd>A</kbd>ufschlag</span>
+                    <span class="scout-legend-item"><kbd>S</kbd> Annahme</span>
+                    <span class="scout-legend-item"><kbd>G</kbd> Angriff</span>
+                    <span class="scout-legend-item"><kbd>B</kbd>lock</span>
+                    <span class="scout-legend-item"><kbd>F</kbd>eldabwehr</span>
+                    <span class="scout-legend-item"><kbd>R</kbd> Freeball</span>
+                    <span class="scout-legend-item"><kbd>Z</kbd> Undo</span>
+                    <span class="scout-legend-item"><kbd>ESC</kbd> Reset</span>
+                </div>
+
+                <!-- Scout Table -->
+                <div class="scout-table-container">
+                    <table class="scout-table" id="scoutTable">
+                        <thead>
+                            <tr>
+                                <th class="scout-th-player">Spieler</th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Aufschlag</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Annahme</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Angriff</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Block</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Feldabwehr</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-element">
+                                    <span class="scout-th-label">Freeball</span>
+                                    <span class="scout-th-sub">Ø | n</span>
+                                </th>
+                                <th class="scout-th-actions"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoutTableBody">
+                            <!-- Player rows will be injected by JS -->
+                        </tbody>
+                        <tfoot id="scoutTableFoot">
+                            <!-- Team totals will be injected by JS -->
+                        </tfoot>
+                    </table>
+
+                    <div class="scout-empty-state" id="scoutEmptyState">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <line x1="20" y1="8" x2="20" y2="14" />
+                            <line x1="23" y1="11" x2="17" y2="11" />
+                        </svg>
+                        <h3>Keine Spieler</h3>
+                        <p>Füge Spieler hinzu um mit dem Scouting zu beginnen.</p>
+                        <button class="btn-primary-sm" id="scoutAddPlayerEmpty">+ Spieler hinzufügen</button>
+                    </div>
+                </div>
+
+                <!-- Team Summary Cards -->
+                <div class="scout-summary-grid" id="scoutSummaryGrid">
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Kill Ratio</span>
+                        <span class="scout-summary-value" id="scoutKillRatio">--%</span>
+                        <span class="scout-summary-sub">Angriff Punkte / Gesamt</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Annahme %</span>
+                        <span class="scout-summary-value" id="scoutReceptionPct">--%</span>
+                        <span class="scout-summary-sub">Perfekte Annahmen / Gesamt</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Asse</span>
+                        <span class="scout-summary-value" id="scoutAces">0</span>
+                        <span class="scout-summary-sub">Direkte Aufschlag-Punkte</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Unforced Errors</span>
+                        <span class="scout-summary-value" id="scoutUE">0</span>
+                        <span class="scout-summary-sub">Eigene Fehler (0-Wertungen)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Overlays -->
+            <section class="page" id="page-overlays">
+                <div class="page-header">
+                    <h1 class="page-title">Stream Overlays</h1>
+                    <p class="page-subtitle">OBS Scene & Source Control</p>
+                </div>
+
+                <div class="coming-soon-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    <h3>Coming Soon</h3>
+                    <p>OBS WebSocket integration and overlay control will be available in Phase 4.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Add Profile Modal -->
+        <div class="modal-overlay hidden" id="modalOverlay">
+            <div class="modal">
+                <h3 class="modal-title">Add Profile</h3>
+                <div class="form-group">
+                    <label class="form-label">Profile Name</label>
+                    <input type="text" class="form-input" id="newProfileName" placeholder="e.g., Volleyball Stream">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Relay Server URL</label>
+                    <input type="text" class="form-input" id="newProfileUrl" placeholder="wss://relay.example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="newProfilePassword" placeholder="Optional">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                    <button class="btn-primary" id="saveProfileBtn">Save Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Panel Toggle Button (floating) -->
+        <button class="log-panel-toggle" id="logPanelToggle" title="Event Log">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <span class="log-badge hidden" id="logBadge">0</span>
+        </button>
+
+        <!-- Log Panel (slide-out) -->
+        <div class="log-panel" id="logPanel">
+            <div class="log-panel-header">
+                <div class="log-panel-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span>Event Log</span>
+                    <span class="log-count" id="logCount">0 events</span>
+                </div>
+                <button class="log-panel-close" id="logPanelClose">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="log-panel-filters">
+                <select class="log-filter" id="logFilterCategory">
+                    <option value="all">All Categories</option>
+                    <option value="connection">Connection</option>
+                    <option value="stream">Stream</option>
+                    <option value="command">Command</option>
+                    <option value="stats">Stats</option>
+                    <option value="error">Error</option>
+                    <option value="system">System</option>
+                </select>
+                <select class="log-filter" id="logFilterDevice">
+                    <option value="all">All Devices</option>
+                </select>
+            </div>
+
+            <div class="log-panel-actions">
+                <button class="log-action-btn" id="logClearBtn">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Clear
+                </button>
+                <button class="log-action-btn" id="logExportBtn">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Export
+                </button>
+            </div>
+
+            <div class="log-list" id="logList">
+                <!-- Log entries rendered dynamically -->
+            </div>
+        </div>
+    </div>
+    <script src="app.js?v=3"></script>
+    <script src="scout.js?v=1"></script>
+    <script src="router.js?v=1"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        (function () {
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            const iconDark = themeToggle?.querySelector('.theme-icon-dark');
+            const iconLight = themeToggle?.querySelector('.theme-icon-light');
+
+            // Load saved theme or default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            html.setAttribute('data-theme', savedTheme);
+            updateIcons(savedTheme);
+
+            function updateIcons(theme) {
+                if (!iconDark || !iconLight) return;
+                if (theme === 'dark') {
+                    iconDark.classList.remove('hidden');
+                    iconLight.classList.add('hidden');
+                } else {
+                    iconDark.classList.add('hidden');
+                    iconLight.classList.remove('hidden');
+                }
+            }
+
+            themeToggle?.addEventListener('click', function () {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateIcons(newTheme);
+            });
+        })();
+    </script>
+</body>
+
+</html>

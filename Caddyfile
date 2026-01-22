@@ -1,0 +1,25 @@
+# VolleyBratans Stream Platform - Caddyfile
+# Auto-SSL reverse proxy configuration
+
+# Production domain
+# Production domain
+stream.volleybratans.com {
+    # Scout API and WebSocket to Go relay
+    reverse_proxy /ws relay:8080
+    reverse_proxy /api/* relay:8080
+
+    # Static files via Nginx
+    reverse_proxy web:80
+
+    # Enable access logging
+    log {
+        output file /var/log/caddy/access.log
+    }
+}
+
+# Optional: local development without SSL
+:80 {
+    reverse_proxy /ws relay:8080
+    reverse_proxy /api/* relay:8080
+    reverse_proxy web:80
+}

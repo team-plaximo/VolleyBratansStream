@@ -1,0 +1,23 @@
+# Environment Variables
+.env
+.env.local
+
+# Node
+node_modules/
+npm-debug.log
+
+# Go
+relay/relay
+relay/relay.exe
+
+# Local Data
+data/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

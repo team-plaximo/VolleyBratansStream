@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plaximo Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           Plaximo Design System - Teal Theme
+           ========================================= */
+        :root {
+            /* Primary - Teal */
+            --color-primary-50: #f0fdfa;
+            --color-primary-100: #ccfbf1;
+            --color-primary-200: #99f6e4;
+            --color-primary-300: #5eead4;
+            --color-primary-400: #2dd4bf;
+            --color-primary-500: #14b8a6;
+            --color-primary-600: #0d9488;
+            --color-primary-700: #0f766e;
+            --color-primary-800: #115e59;
+            --color-primary-900: #134e4a;
+
+            /* Neutrals - Slate */
+            --color-surface: #0f172a;
+            --color-surface-elevated: #1e293b;
+            --color-surface-overlay: rgba(30, 41, 59, 0.95);
+            --color-text-primary: #f8fafc;
+            --color-text-secondary: #94a3b8;
+            --color-border: rgba(148, 163, 184, 0.2);
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+
+            /* Border Radius */
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+
+            /* Shadows */
+            --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.3);
+            --shadow-elevation: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--color-surface) 0%, #1a1a2e 50%, var(--color-surface) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+            color: var(--color-text-primary);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Calculator Container */
+        .calculator {
+            background: var(--color-surface-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            width: 100%;
+            max-width: 320px;
+            box-shadow: var(--shadow-elevation), var(--shadow-glow);
+        }
+
+        /* Display */
+        .display {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            text-align: right;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .display-operation {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            min-height: 1.5rem;
+            word-break: break-all;
+        }
+
+        .display-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            word-break: break-all;
+            line-height: 1.2;
+        }
+
+        .display-value.error {
+            color: #ef4444;
+            font-size: 1.5rem;
+        }
+
+        /* Keypad Grid */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        /* Button Base */
+        .btn {
+            border: none;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            font-family: inherit;
+            font-size: 1.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-400);
+            outline-offset: 2px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Number Buttons */
+        .btn-number {
+            background: rgba(20, 184, 166, 0.08);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            color: var(--color-text-primary);
+        }
+
+        .btn-number:hover {
+            background: rgba(20, 184, 166, 0.15);
+            border-color: rgba(20, 184, 166, 0.4);
+        }
+
+        /* Operator Buttons */
+        .btn-operator {
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-operator:hover {
+            background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-operator.active {
+            background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400));
+            box-shadow: 0 0 30px rgba(20, 184, 166, 0.5);
+        }
+
+        /* Function Buttons */
+        .btn-function {
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .btn-function:hover {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--color-text-primary);
+        }
+
+        /* Special Buttons */
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .btn-clear:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-equals {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+            font-size: 1.5rem;
+        }
+
+        .btn-equals:hover {
+            background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: var(--spacing-xl);
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .footer a {
+            color: var(--color-primary-500);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Keyboard Hint */
+        .keyboard-hint {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(20, 184, 166, 0.1);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Live Region for Announcements */
+        #announcer {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Live region for screen reader announcements -->
+    <div id="announcer" aria-live="polite" aria-atomic="true"></div>
+
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <span class="logo-text">Plaximo</span>
+        </div>
+        <p class="subtitle">Calculator</p>
+    </header>
+
+    <main class="calculator" role="application" aria-label="Taschenrechner">
+        <div class="display" aria-live="polite">
+            <div class="display-operation" id="operation" aria-label="Aktuelle Berechnung"></div>
+            <div class="display-value" id="display" aria-label="Ergebnis">0</div>
+        </div>
+
+        <div class="keypad" role="group" aria-label="Tastatur">
+            <!-- Row 1 -->
+            <button class="btn btn-clear" data-action="clear" aria-label="Alles löschen">AC</button>
+            <button class="btn btn-function" data-action="toggle-sign" aria-label="Vorzeichen wechseln">±</button>
+            <button class="btn btn-function" data-action="percent" aria-label="Prozent">%</button>
+            <button class="btn btn-operator" data-operator="/" aria-label="Dividieren">÷</button>
+
+            <!-- Row 2 -->
+            <button class="btn btn-number" data-number="7" aria-label="7">7</button>
+            <button class="btn btn-number" data-number="8" aria-label="8">8</button>
+            <button class="btn btn-number" data-number="9" aria-label="9">9</button>
+            <button class="btn btn-operator" data-operator="*" aria-label="Multiplizieren">×</button>
+
+            <!-- Row 3 -->
+            <button class="btn btn-number" data-number="4" aria-label="4">4</button>
+            <button class="btn btn-number" data-number="5" aria-label="5">5</button>
+            <button class="btn btn-number" data-number="6" aria-label="6">6</button>
+            <button class="btn btn-operator" data-operator="-" aria-label="Subtrahieren">−</button>
+
+            <!-- Row 4 -->
+            <button class="btn btn-number" data-number="1" aria-label="1">1</button>
+            <button class="btn btn-number" data-number="2" aria-label="2">2</button>
+            <button class="btn btn-number" data-number="3" aria-label="3">3</button>
+            <button class="btn btn-operator" data-operator="+" aria-label="Addieren">+</button>
+
+            <!-- Row 5 -->
+            <button class="btn btn-number btn-zero" data-number="0" aria-label="0">0</button>
+            <button class="btn btn-number" data-action="decimal" aria-label="Dezimalpunkt">,</button>
+            <button class="btn btn-operator btn-equals" data-action="equals" aria-label="Berechnen">=</button>
+        </div>
+
+        <div class="keyboard-hint">
+            ⌨️ Tastatur: Zahlen, +, -, *, /, Enter, Escape
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Powered by <a href="https://plaximo.de">Plaximo Design System</a></p>
+        <p>VolleyBratans Stream Platform © 2026</p>
+    </footer>
+
+    <script>
+        /**
+         * Plaximo Calculator - Pure JavaScript Implementation
+         * Tri-Agent Consensus: Builder Logic + Critic Security
+         */
+        (function () {
+            'use strict';
+
+            // State
+            let currentValue = '0';
+            let previousValue = '';
+            let currentOperator = null;
+            let shouldResetDisplay = false;
+
+            // DOM Elements
+            const display = document.getElementById('display');
+            const operation = document.getElementById('operation');
+            const announcer = document.getElementById('announcer');
+            const operatorButtons = document.querySelectorAll('.btn-operator[data-operator]');
+
+            // --- Core Calculation (NO EVAL - Critic Security) ---
+            function calculate(a, b, operator) {
+                const numA = parseFloat(a);
+                const numB = parseFloat(b);
+
+                if (isNaN(numA) || isNaN(numB)) {
+                    return 'Error';
+                }
+
+                switch (operator) {
+                    case '+':
+                        return numA + numB;
+                    case '-':
+                        return numA - numB;
+                    case '*':
+                        return numA * numB;
+                    case '/':
+                        // Division by zero check
+                        if (numB === 0) {
+                            return 'Error';
+                        }
+                        return numA / numB;
+                    default:
+                        return numB;
+                }
+            }
+
+            // --- Display Formatting ---
+            function formatNumber(num) {
+                if (num === 'Error') return num;
+
+                const number = parseFloat(num);
+                if (isNaN(number)) return '0';
+
+                // Handle very large or small numbers
+                if (Math.abs(number) > 999999999999) {
+                    return number.toExponential(4);
+                }
+
+                // Format with locale (German comma as decimal)
+                const formatted = number.toLocaleString('de-DE', {
+                    maximumFractionDigits: 10,
+                    useGrouping: false
+                });
+
+                return formatted;
+            }
+
+            function updateDisplay() {
+                const isError = currentValue === 'Error';
+                display.textContent = formatNumber(currentValue);
+                display.classList.toggle('error', isError);
+
+                // Update operation display
+                if (previousValue && currentOperator) {
+                    const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+                    operation.textContent = `${formatNumber(previousValue)} ${opSymbol[currentOperator] || currentOperator}`;
+                } else {
+                    operation.textContent = '';
+                }
+            }
+
+            function announce(message) {
+                announcer.textContent = message;
+            }
+
+            // --- Input Handlers ---
+            function inputNumber(num) {
+                if (currentValue === 'Error') {
+                    currentValue = num;
+                } else if (shouldResetDisplay) {
+                    currentValue = num;
+                    shouldResetDisplay = false;
+                } else if (currentValue === '0' && num !== '.') {
+                    currentValue = num;
+                } else if (currentValue.replace(/[^0-9]/g, '').length < 12) {
+                    // Limit input length
+                    currentValue += num;
+                }
+                updateDisplay();
+            }
+
+            function inputDecimal() {
+                if (shouldResetDisplay) {
+                    currentValue = '0.';
+                    shouldResetDisplay = false;
+                } else if (!currentValue.includes('.')) {
+                    currentValue += '.';
+                }
+                updateDisplay();
+            }
+
+            function inputOperator(op) {
+                // Clear active state from all operator buttons
+                operatorButtons.forEach(btn => btn.classList.remove('active'));
+
+                if (currentOperator && !shouldResetDisplay) {
+                    // Chain calculation
+                    const result = calculate(previousValue, currentValue, currentOperator);
+                    currentValue = String(result);
+                    announce(`Ergebnis: ${formatNumber(currentValue)}`);
+                }
+
+                previousValue = currentValue;
+                currentOperator = op;
+                shouldResetDisplay = true;
+
+                // Highlight active operator
+                const activeBtn = document.querySelector(`[data-operator="${op}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+
+                updateDisplay();
+            }
+
+            function calculate_result() {
+                if (!currentOperator || !previousValue) return;
+
+                const result = calculate(previousValue, currentValue, currentOperator);
+
+                // Store for display before resetting
+                const fullOperation = `${formatNumber(previousValue)} ${currentOperator} ${formatNumber(currentValue)}`;
+
+                currentValue = String(result);
+                previousValue = '';
+                currentOperator = null;
+                shouldResetDisplay = true;
+
+                // Clear operator highlight
+                operatorButtons.forEach(btn => btn.classList.remove('active'));
+
+                updateDisplay();
+                announce(`${fullOperation} = ${formatNumber(currentValue)}`);
+            }
+
+            function clear() {
+                currentValue = '0';
+                previousValue = '';
+                currentOperator = null;
+                shouldResetDisplay = false;
+                operatorButtons.forEach(btn => btn.classList.remove('active'));
+                updateDisplay();
+                announce('Zurückgesetzt');
+            }
+
+            function toggleSign() {
+                if (currentValue !== '0' && currentValue !== 'Error') {
+                    currentValue = currentValue.startsWith('-')
+                        ? currentValue.slice(1)
+                        : '-' + currentValue;
+                    updateDisplay();
+                }
+            }
+
+            function percent() {
+                if (currentValue !== 'Error') {
+                    currentValue = String(parseFloat(currentValue) / 100);
+                    updateDisplay();
+                }
+            }
+
+            // --- Event Listeners ---
+            document.querySelector('.keypad').addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn');
+                if (!btn) return;
+
+                // Number input
+                if (btn.dataset.number !== undefined) {
+                    inputNumber(btn.dataset.number);
+                }
+                // Operator input
+                else if (btn.dataset.operator) {
+                    inputOperator(btn.dataset.operator);
+                }
+                // Actions
+                else if (btn.dataset.action) {
+                    switch (btn.dataset.action) {
+                        case 'clear':
+                            clear();
+                            break;
+                        case 'decimal':
+                            inputDecimal();
+                            break;
+                        case 'equals':
+                            calculate_result();
+                            break;
+                        case 'toggle-sign':
+                            toggleSign();
+                            break;
+                        case 'percent':
+                            percent();
+                            break;
+                    }
+                }
+            });
+
+            // Keyboard Support (Critic requirement)
+            document.addEventListener('keydown', (e) => {
+                const key = e.key;
+
+                // Numbers
+                if (/^[0-9]$/.test(key)) {
+                    inputNumber(key);
+                    e.preventDefault();
+                }
+                // Decimal
+                else if (key === '.' || key === ',') {
+                    inputDecimal();
+                    e.preventDefault();
+                }
+                // Operators
+                else if (['+', '-', '*', '/'].includes(key)) {
+                    inputOperator(key);
+                    e.preventDefault();
+                }
+                // Enter = Equals
+                else if (key === 'Enter' || key === '=') {
+                    calculate_result();
+                    e.preventDefault();
+                }
+                // Escape = Clear
+                else if (key === 'Escape') {
+                    clear();
+                    e.preventDefault();
+                }
+                // Backspace = Delete last character
+                else if (key === 'Backspace') {
+                    if (currentValue.length > 1) {
+                        currentValue = currentValue.slice(0, -1);
+                    } else {
+                        currentValue = '0';
+                    }
+                    updateDisplay();
+                    e.preventDefault();
+                }
+            });
+
+            // Initialize
+            updateDisplay();
+        })();
+    </script>
+</body>
+
+</html>
