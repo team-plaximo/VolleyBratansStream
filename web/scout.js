@@ -389,7 +389,7 @@ class ScoutEngine {
     }
 
     addScore(playerId, element, score) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
         player.stats[element].push(score);
@@ -398,7 +398,7 @@ class ScoutEngine {
     }
 
     undoLastScore(playerId, element) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player || player.stats[element].length === 0) return;
 
         player.stats[element].pop();
@@ -479,7 +479,7 @@ class ScoutEngine {
         }).join('');
 
         // Keyboard shortcut badge (always visible for first 9 players)
-        const playerIndex = this.data.players.findIndex(p => p.id === player.id);
+        const playerIndex = this.data.players.findIndex(p => p.id == player.id);
         const keyboardKey = playerIndex < 9 ? playerIndex + 1 : null;
         const keyBadge = keyboardKey ? `<span class="scout-key-badge" title="Taste ${keyboardKey}">${keyboardKey}</span>` : '';
 
@@ -624,6 +624,13 @@ class ScoutEngine {
     initTableListeners() {
         if (!this.tableBody) return;
 
+        // Guard: Prevent duplicate event listener registration
+        if (this.tableListenersInitialized) {
+            console.log('[Scout] Table listeners already initialized, skipping');
+            return;
+        }
+        this.tableListenersInitialized = true;
+
         this.tableBody.addEventListener('click', (e) => {
             const target = e.target;
 
@@ -686,7 +693,7 @@ class ScoutEngine {
      * Cycles through player positions: Z -> D -> AA -> MB -> L -> ?
      */
     cyclePlayerPosition(playerId) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
         const currentPos = player.position;
@@ -712,7 +719,7 @@ class ScoutEngine {
      * Toggles player active status (Starting 6)
      */
     togglePlayerActive(playerId) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
         player.active = !player.active;
@@ -724,7 +731,7 @@ class ScoutEngine {
      * Show modal to edit player jersey number
      */
     showNumberEditModal(playerId) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
         const currentNumber = player.number || '';
@@ -755,7 +762,7 @@ class ScoutEngine {
      * Show modal with score history for a specific player/element
      */
     showScoreHistoryModal(playerId, element) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
         const scores = player.stats[element] || [];
@@ -870,7 +877,7 @@ class ScoutEngine {
      * Delete a specific score by index
      */
     deleteSpecificScore(playerId, element, index) {
-        const player = this.data.players.find(p => p.id === playerId);
+        const player = this.data.players.find(p => p.id == playerId);
         if (!player || !player.stats[element]) return;
 
         const scores = player.stats[element];
@@ -958,8 +965,8 @@ class ScoutEngine {
             if (targetPlayerId === this.draggedPlayerId) return;
 
             // Find indices
-            const fromIndex = this.data.players.findIndex(p => p.id === this.draggedPlayerId);
-            const toIndex = this.data.players.findIndex(p => p.id === targetPlayerId);
+            const fromIndex = this.data.players.findIndex(p => p.id == this.draggedPlayerId);
+            const toIndex = this.data.players.findIndex(p => p.id == targetPlayerId);
             if (fromIndex === -1 || toIndex === -1) return;
 
             // Determine if dropping above or below
