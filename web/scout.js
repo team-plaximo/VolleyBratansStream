@@ -445,8 +445,10 @@ class ScoutEngine {
         // Update summary cards
         this.updateSummary();
 
-        // Re-attach event listeners
-        this.attachRowListeners();
+        // Initial render
+        this.render();
+
+        this.initTableListeners();
     }
 
     renderPlayerRow(player) {
@@ -618,58 +620,64 @@ class ScoutEngine {
         }
     }
 
-    attachRowListeners() {
-        // Score buttons
-        this.tableBody.querySelectorAll('.scout-score-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.target.dataset.player);
-                const element = e.target.dataset.element;
-                const score = parseInt(e.target.dataset.score);
-                this.addScore(playerId, element, score);
-            });
-        });
+    initTableListeners() {
+        if (!this.tableBody) return;
 
-        // Delete buttons
-        this.tableBody.querySelectorAll('.scout-player-delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.currentTarget.dataset.delete);
+        this.tableBody.addEventListener('click', (e) => {
+            const target = e.target;
+
+            // 1. Score Buttons
+            const scoreBtn = target.closest('.scout-score-btn');
+            if (scoreBtn) {
+                const playerId = parseFloat(scoreBtn.dataset.player);
+                const element = scoreBtn.dataset.element;
+                const score = parseInt(scoreBtn.dataset.score);
+                this.addScore(playerId, element, score);
+                return;
+            }
+
+            // 2. Delete Button
+            const deleteBtn = target.closest('.scout-player-delete');
+            if (deleteBtn) {
+                const playerId = parseFloat(deleteBtn.dataset.delete);
                 if (confirm('Spieler wirklich entfernen? Alle Statistiken gehen verloren.')) {
                     this.removePlayer(playerId);
                 }
-            });
-        });
+                return;
+            }
 
-        // Jersey number edit/add buttons
-        this.tableBody.querySelectorAll('.scout-number-edit, .scout-number-add').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.currentTarget.dataset.playerId);
+            // 3. Number Edit
+            const numberLabel = target.closest('.scout-number-edit, .scout-number-add');
+            if (numberLabel) {
+                const playerId = parseFloat(numberLabel.dataset.playerId);
                 this.showNumberEditModal(playerId);
-            });
-        });
+                return;
+            }
 
-        // Cell stats click for history modal
-        this.tableBody.querySelectorAll('.scout-cell-stats').forEach(cell => {
-            cell.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.currentTarget.dataset.player);
-                const element = e.currentTarget.dataset.element;
+            // 4. Stats History (Average)
+            const statsCell = target.closest('.scout-cell-stats');
+            if (statsCell) {
+                const playerId = parseFloat(statsCell.dataset.player);
+                const element = statsCell.dataset.element;
                 this.showScoreHistoryModal(playerId, element);
-            });
-        });
+                return;
+            }
 
-        // Position Badge Click
-        this.tableBody.querySelectorAll('.scout-position-badge').forEach(badge => {
-            badge.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.currentTarget.dataset.playerId);
+            // 5. Position Badge
+            const posBadge = target.closest('.scout-position-badge');
+            if (posBadge) {
+                const playerId = parseFloat(posBadge.dataset.playerId);
                 this.cyclePlayerPosition(playerId);
-            });
-        });
+                return;
+            }
 
-        // Active Toggle Click
-        this.tableBody.querySelectorAll('.scout-active-toggle').forEach(toggle => {
-            toggle.addEventListener('click', (e) => {
-                const playerId = parseFloat(e.currentTarget.dataset.playerId);
+            // 6. Active Toggle (Starting Six)
+            const activeToggle = target.closest('.scout-active-toggle');
+            if (activeToggle) {
+                const playerId = parseFloat(activeToggle.dataset.playerId);
                 this.togglePlayerActive(playerId);
-            });
+                return;
+            }
         });
     }
 
