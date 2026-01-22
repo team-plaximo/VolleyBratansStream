@@ -319,6 +319,9 @@ class ScoutEngine {
         // Initial render
         this.render();
 
+        // Initialize table event listeners ONCE (uses event delegation)
+        this.initTableListeners();
+
         // Initialize Quick-Scout keyboard shortcuts
         this.initKeyboardShortcuts();
         this.createQuickIndicator();
