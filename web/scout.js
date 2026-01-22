@@ -445,9 +445,7 @@ class ScoutEngine {
         // Update summary cards
         this.updateSummary();
 
-        // Initial render
-        this.render();
-
+        // Re-initialize table listeners after re-rendering
         this.initTableListeners();
     }
 
