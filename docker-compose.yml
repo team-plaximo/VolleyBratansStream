@@ -61,3 +61,7 @@ services:
 networks:
   volleybratans-network:
     driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
