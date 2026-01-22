@@ -445,8 +445,8 @@ class ScoutEngine {
         // Update summary cards
         this.updateSummary();
 
-        // Re-initialize table listeners after re-rendering
-        this.initTableListeners();
+        // NOTE: initTableListeners() is called ONCE in init(), NOT here!
+        // Event delegation on tableBody handles dynamically added rows.
     }
 
     renderPlayerRow(player) {
