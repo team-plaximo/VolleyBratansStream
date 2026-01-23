@@ -1348,20 +1348,44 @@ class ScoutEngine {
             const textContent = await page.getTextContent();
             const text = textContent.items.map(item => item.str).join(' ');
 
-            // Split by common patterns to get lines
-            const lines = text.split(/(?=\d{1,2}\s+[A-ZÄÖÜ][a-zäöüß]+,)/g);
+            console.log('[Scout PDF] Page', i, 'raw text:', text.substring(0, 500));
 
-            for (const line of lines) {
-                // Match pattern: Number Name, FirstName (e.g., "11 Bindemann, Roland")
-                const match = line.match(/^(\d{1,2})\s+([A-ZÄÖÜ][a-zäöüß]+,\s*[A-ZÄÖÜ][a-zäöüß]+)/);
-                if (match) {
-                    players.push({
-                        number: parseInt(match[1]),
-                        name: match[2].trim()
-                    });
+            // Try multiple regex patterns for different PDF formats
+            const patterns = [
+                // SBVV Format: "11 Bindemann, Roland"
+                /(\d{1,2})\s+([A-ZÄÖÜa-zäöüß]+,\s*[A-ZÄÖÜa-zäöüß]+)/gi,
+                // VCO Format: "11 BINDEMANN Roland" (all caps lastname)
+                /(\d{1,2})\s+([A-ZÄÖÜ]+)\s+([A-ZÄÖÜa-zäöüß]+)/g,
+                // Alternative: "Nr. 11 Name Vorname"
+                /Nr\.?\s*(\d{1,2})\s+([A-ZÄÖÜa-zäöüß]+[\s,]+[A-ZÄÖÜa-zäöüß]+)/gi
+            ];
+
+            // Try Pattern 1: SBVV format (Name, Vorname)
+            let match;
+            const regex1 = /(\d{1,2})\s+([A-ZÄÖÜa-zäöüß]+,\s*[A-ZÄÖÜa-zäöüß]+)/gi;
+            while ((match = regex1.exec(text)) !== null) {
+                const num = parseInt(match[1]);
+                const name = match[2].trim();
+                console.log('[Scout PDF] Pattern 1 match:', num, name);
+                players.push({ number: num, name: name });
+            }
+
+            // Try Pattern 2: VCO format (LASTNAME Firstname - no comma)
+            if (players.length === 0) {
+                const regex2 = /(\d{1,2})\s+([A-ZÄÖÜ]{2,})\s+([A-Za-zäöüß]+)/g;
+                while ((match = regex2.exec(text)) !== null) {
+                    const num = parseInt(match[1]);
+                    // Convert "LASTNAME Firstname" to "Lastname, Firstname"
+                    const lastName = match[2].charAt(0) + match[2].slice(1).toLowerCase();
+                    const firstName = match[3];
+                    const name = `${lastName}, ${firstName}`;
+                    console.log('[Scout PDF] Pattern 2 match:', num, name);
+                    players.push({ number: num, name: name });
                 }
             }
         }
+
+        console.log('[Scout PDF] Total players found:', players.length, players);
 
         // Remove duplicates by number
         const seen = new Set();
