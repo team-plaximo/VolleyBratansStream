@@ -1,9 +1,9 @@
 /**
  * Scout State Store - Server-Side Persistence
- * Stores volleyball scout data with version tracking for multi-client sync
+ * Stores volleyball scout data with version tracking
  */
 
-package main
+package stores
 
 import (
 	"encoding/json"
@@ -12,61 +12,23 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+	"github.com/volleybratans/moblin-relay/models"
 )
-
-// ScoutPlayer represents a player with their scouting data
-type ScoutPlayer struct {
-	ID      string              `json:"id"`
-	Name    string              `json:"name"`
-	Number  *int                `json:"number,omitempty"`
-	Scores  map[string][]int    `json:"scores"`
-}
-
-// SetScore represents the score of a single set
-type SetScore struct {
-	Home int `json:"home"`
-	Away int `json:"away"`
-}
-
-// ScoreboardData holds the current match score
-type ScoreboardData struct {
-	HomeTeam   string     `json:"homeTeam"`
-	AwayTeam   string     `json:"awayTeam"`
-	HomeSets   int        `json:"homeSets"`
-	AwaySets   int        `json:"awaySets"`
-	HomePoints int        `json:"homePoints"`
-	AwayPoints int        `json:"awayPoints"`
-	CurrentSet int        `json:"currentSet"`
-	SetHistory []SetScore `json:"setHistory"`
-}
-
-// ScoutState represents the complete match scouting state
-type ScoutState struct {
-	Version     int64          `json:"version"`
-	LastUpdated string         `json:"lastUpdated"`
-	MatchName   string         `json:"matchName"`
-	MatchDate   string         `json:"matchDate"`
-	Players     []ScoutPlayer  `json:"players"`
-	Scoreboard  ScoreboardData `json:"scoreboard"`
-}
-
 
 // ScoutStore manages persistent storage of scout state
 type ScoutStore struct {
 	dataDir     string
 	currentFile string
-	state       *ScoutState
+	state       *models.ScoutState
 	mu          sync.RWMutex
 }
 
-// NewScoutStore creates a new scout store with the given data directory
+// NewScoutStore creates a new scout store
 func NewScoutStore(dataDir string) (*ScoutStore, error) {
-	// Ensure data directory exists
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
 		return nil, err
 	}
 	
-	// Create archive subdirectory
 	archiveDir := filepath.Join(dataDir, "archive")
 	if err := os.MkdirAll(archiveDir, 0755); err != nil {
 		return nil, err
@@ -77,22 +39,19 @@ func NewScoutStore(dataDir string) (*ScoutStore, error) {
 		currentFile: filepath.Join(dataDir, "scout-current.json"),
 	}
 
-	// Load existing state or create new
 	if err := store.load(); err != nil {
-		// Create empty state
-		store.state = &ScoutState{
+		store.state = &models.ScoutState{
 			Version:     1,
 			LastUpdated: time.Now().UTC().Format(time.RFC3339),
 			MatchName:   "",
 			MatchDate:   time.Now().Format("2006-01-02"),
-			Players:     []ScoutPlayer{},
+			Players:     []models.Player{},
 		}
 	}
 
 	return store, nil
 }
 
-// load reads state from disk
 func (s *ScoutStore) load() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -102,7 +61,7 @@ func (s *ScoutStore) load() error {
 		return err
 	}
 
-	var state ScoutState
+	var state models.ScoutState
 	if err := json.Unmarshal(data, &state); err != nil {
 		return err
 	}
@@ -111,71 +70,58 @@ func (s *ScoutStore) load() error {
 	return nil
 }
 
-// save writes state to disk
 func (s *ScoutStore) save() error {
 	data, err := json.MarshalIndent(s.state, "", "  ")
 	if err != nil {
 		return err
 	}
-
 	return ioutil.WriteFile(s.currentFile, data, 0644)
 }
 
-// GetState returns the current scout state
-func (s *ScoutStore) GetState() ScoutState {
+func (s *ScoutStore) GetState() models.ScoutState {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if s.state == nil {
-		return ScoutState{
+		return models.ScoutState{
 			Version:     0,
 			LastUpdated: time.Now().UTC().Format(time.RFC3339),
-			Players:     []ScoutPlayer{},
+			Players:     []models.Player{},
 		}
 	}
-
 	return *s.state
 }
 
-// GetVersion returns just the current version number (for sync checks)
 func (s *ScoutStore) GetVersion() int64 {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if s.state == nil {
 		return 0
 	}
 	return s.state.Version
 }
 
-// UpdateState updates the scout state and increments version
-func (s *ScoutStore) UpdateState(newState ScoutState) error {
+func (s *ScoutStore) UpdateState(newState models.ScoutState) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// Increment version
 	newState.Version = s.state.Version + 1
 	newState.LastUpdated = time.Now().UTC().Format(time.RFC3339)
-
 	s.state = &newState
 
 	return s.save()
 }
 
-// ArchiveMatch saves the current match to archive and resets state
 func (s *ScoutStore) ArchiveMatch() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if s.state == nil || s.state.MatchName == "" {
-		return nil // Nothing to archive
+		return nil
 	}
 
-	// Create archive filename
 	archiveName := s.state.MatchDate + "_" + sanitizeFilename(s.state.MatchName) + ".json"
 	archivePath := filepath.Join(s.dataDir, "archive", archiveName)
 
-	// Save to archive
 	data, err := json.MarshalIndent(s.state, "", "  ")
 	if err != nil {
 		return err
@@ -184,19 +130,17 @@ func (s *ScoutStore) ArchiveMatch() error {
 		return err
 	}
 
-	// Reset state for new match
-	s.state = &ScoutState{
+	s.state = &models.ScoutState{
 		Version:     1,
 		LastUpdated: time.Now().UTC().Format(time.RFC3339),
 		MatchName:   "",
 		MatchDate:   time.Now().Format("2006-01-02"),
-		Players:     []ScoutPlayer{},
+		Players:     []models.Player{},
 	}
 
 	return s.save()
 }
 
-// sanitizeFilename removes invalid characters from filename
 func sanitizeFilename(name string) string {
 	invalid := []string{"/", "\\", ":", "*", "?", "\"", "<", ">", "|", " "}
 	result := name
