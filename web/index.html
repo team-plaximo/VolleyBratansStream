@@ -9,7 +9,7 @@
     <meta name="keywords" content="volleyball, streaming, remote control, live streaming, mobile streaming, sports">
     <meta name="author" content="VolleyBratans">
     <title>VolleyBratans Stream Platform</title>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
     <!-- Async Google Fonts Loading (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -603,8 +603,36 @@
                     </div>
                 </div>
 
+                <!-- Scoreboard Control Panel -->
+                <div class="scoreboard-panel" id="scoreboardPanel">
+                    <div class="sb-team sb-home">
+                        <input type="text" class="sb-team-input" id="sbHomeTeam" placeholder="Heim" maxlength="20">
+                        <div class="sb-points">
+                            <button class="sb-btn sb-btn-minus" data-team="home" data-action="sub">−</button>
+                            <span class="sb-points-value" id="sbHomePoints">0</span>
+                            <button class="sb-btn sb-btn-plus" data-team="home" data-action="add">+</button>
+                        </div>
+                        <span class="sb-sets-value" id="sbHomeSets">0</span>
+                    </div>
+                    <div class="sb-center">
+                        <span class="sb-set-label" id="sbCurrentSet">Satz 1</span>
+                        <div class="sb-set-history" id="sbSetHistory"></div>
+                        <button class="sb-end-set-btn" id="sbEndSet">Satz beenden</button>
+                    </div>
+                    <div class="sb-team sb-away">
+                        <span class="sb-sets-value" id="sbAwaySets">0</span>
+                        <div class="sb-points">
+                            <button class="sb-btn sb-btn-minus" data-team="away" data-action="sub">−</button>
+                            <span class="sb-points-value" id="sbAwayPoints">0</span>
+                            <button class="sb-btn sb-btn-plus" data-team="away" data-action="add">+</button>
+                        </div>
+                        <input type="text" class="sb-team-input" id="sbAwayTeam" placeholder="Gast" maxlength="20">
+                    </div>
+                </div>
+
                 <!-- Scout Legend -->
                 <div class="scout-legend">
+
                     <span class="scout-legend-title">Bewertung:</span>
                     <span class="scout-legend-item"><span class="scout-score-badge scout-score-3">3</span>
                         Perfekt</span>
@@ -802,7 +830,7 @@
         </div>
     </div>
     <script src="app.js?v=3"></script>
-    <script src="scout.js?v=3"></script>
+    <script src="scout.js?v=4"></script>
     <script src="router.js?v=1"></script>
 
     <!-- Theme Toggle Script -->
@@ -838,6 +866,8 @@
             });
         })();
     </script>
+    <script src="scoreboard.js?v=1"></script>
 </body>
+
 
 </html>

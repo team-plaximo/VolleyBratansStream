@@ -2582,7 +2582,7 @@ a svg,
 }
 
 .scout-cell-avg.avg-good {
-    color: #10b981;
+    color: hsl(142 60% 32%);
 }
 
 .scout-cell-avg.avg-ok {
@@ -4109,15 +4109,16 @@ tr.scout-libero {
 
 /* Active Toggle */
 .scout-active-toggle {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
-    border: 2px solid var(--border);
+    border: 2px dashed var(--color-border-strong);
     cursor: pointer;
     transition: all 0.2s ease;
     margin-right: 12px;
     flex-shrink: 0;
-    background: var(--bg-surface);
+    background: transparent;
+    position: relative;
 }
 
 .scout-active-toggle:hover {
@@ -4125,10 +4126,9 @@ tr.scout-libero {
 }
 
 .scout-active-toggle.active {
-    background: var(--success);
-    border-color: var(--success);
-    box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--success-bg);
-    position: relative;
+    background: hsl(142 60% 32%);
+    border: 2px solid hsl(142 60% 32%);
+    box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px hsl(142 60% 32% / 0.2);
 }
 
 .scout-active-toggle.active::after {
@@ -4221,4 +4221,176 @@ tr.scout-libero {
 
 .scout-help-list strong {
     color: var(--primary);
+}/* ========================================
+   SCOREBOARD CONTROL PANEL
+   Live Score Entry for Stream Overlay
+   ======================================== */
+
+.scoreboard-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-4) var(--space-6);
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+}
+
+.sb-team {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.sb-home { flex-direction: row; }
+.sb-away { flex-direction: row-reverse; }
+
+.sb-team-input {
+    width: 140px;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-surface-container);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-default);
+    color: var(--color-text);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    text-align: center;
+}
+
+.sb-team-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-focus);
+}
+
+.sb-team-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.sb-points {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.sb-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-container);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-default);
+    color: var(--color-text);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sb-btn:hover {
+    background: var(--color-surface-container-high);
+    border-color: var(--color-border-strong);
+}
+
+.sb-btn:active {
+    transform: scale(0.95);
+}
+
+.sb-btn-plus:hover {
+    background: hsl(var(--success-500) / 0.15);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.sb-btn-minus:hover {
+    background: hsl(var(--error-500) / 0.15);
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.sb-points-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text);
+    min-width: 2ch;
+    text-align: center;
+}
+
+.sb-sets-value {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    min-width: 1ch;
+    text-align: center;
+    padding: 0 var(--space-2);
+}
+
+.sb-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-4);
+}
+
+.sb-set-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sb-set-history {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.sb-set-result {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-surface-container);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+}
+
+.sb-end-set-btn {
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-primary-solid);
+    color: var(--color-on-primary);
+    border: none;
+    border-radius: var(--radius-default);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sb-end-set-btn:hover {
+    background: var(--color-primary-solid-hover);
+}
+
+@media (max-width: 768px) {
+    .scoreboard-panel {
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        padding: var(--space-3);
+    }
+    
+    .sb-team-input {
+        width: 100px;
+        font-size: var(--text-sm);
+    }
+    
+    .sb-points-value {
+        font-size: var(--text-2xl);
+    }
+    
+    .sb-sets-value {
+        font-size: var(--text-3xl);
+    }
 }

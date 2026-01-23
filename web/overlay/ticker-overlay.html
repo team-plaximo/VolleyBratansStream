@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Volleyball Live Ticker Overlay - Embeddable scoreboard for streams">
+    <title>Volleyball Ticker Overlay</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="ticker-overlay.css">
+</head>
+
+<body class="style-scoreboard">
+    <!-- Overlay Container -->
+    <div class="overlay-container" id="overlayContainer" data-position="center">
+
+        <!-- Loading State -->
+        <div class="overlay-loading hidden" id="overlayLoading">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Error State -->
+        <div class="overlay-error hidden" id="overlayError">
+            <span class="error-text" id="errorMessage">Keine Verbindung</span>
+        </div>
+
+        <!-- Waiting State (no data yet) -->
+        <div class="overlay-waiting hidden" id="overlayWaiting">
+            <span class="waiting-text">Warte auf Daten...</span>
+        </div>
+
+        <!-- Main Scoreboard (compact horizontal bar) -->
+        <div class="scoreboard" id="scoreboard">
+
+            <!-- Team 1 (Home) -->
+            <div class="team team-home" id="teamHome">
+                <span class="team-name" id="homeName">Heim</span>
+            </div>
+
+            <!-- Score Block -->
+            <div class="score-block">
+                <!-- Set Score -->
+                <div class="sets-score">
+                    <span class="sets-value" id="setsHome">0</span>
+                    <span class="sets-divider">:</span>
+                    <span class="sets-value" id="setsAway">0</span>
+                </div>
+                <!-- Current Points -->
+                <div class="points-score">
+                    <span class="points-value" id="pointsHome">0</span>
+                    <span class="points-divider">-</span>
+                    <span class="points-value" id="pointsAway">0</span>
+                </div>
+            </div>
+
+            <!-- Team 2 (Away) -->
+            <div class="team team-away" id="teamAway">
+                <span class="team-name" id="awayName">Gast</span>
+            </div>
+
+        </div>
+
+        <!-- Set History (optional, toggle via URL param) -->
+        <div class="set-history hidden" id="setHistory">
+            <!-- Dynamically populated -->
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Volleyball Ticker Overlay
+         * Fetches scoreboard data from local server API
+         * Displays real-time match score for OBS/stream embedding
+         */
+
+        // URL Parameter Parsing
+        const urlParams = new URLSearchParams(window.location.search);
+        const config = {
+            theme: urlParams.get('theme') || 'dark',
+            style: urlParams.get('style') || 'scoreboard',
+            poll: parseInt(urlParams.get('poll')) || 2000,
+            showSets: urlParams.get('showSets') === 'true',
+            fontSize: urlParams.get('fontSize') || 'medium'
+        };
+
+        // API Base URL
+        function getApiBase() {
+            if (window.location.protocol === 'file:') {
+                return 'http://localhost:8080';
+            }
+            if (window.location.port === '5000') {
+                return `${window.location.protocol}//${window.location.hostname}:8080`;
+            }
+            return '';
+        }
+        const API_BASE = getApiBase();
+
+        // DOM Elements
+        const el = {
+            container: document.getElementById('overlayContainer'),
+            loading: document.getElementById('overlayLoading'),
+            error: document.getElementById('overlayError'),
+            errorMessage: document.getElementById('errorMessage'),
+            waiting: document.getElementById('overlayWaiting'),
+            scoreboard: document.getElementById('scoreboard'),
+
+            homeName: document.getElementById('homeName'),
+            awayName: document.getElementById('awayName'),
+            setsHome: document.getElementById('setsHome'),
+            setsAway: document.getElementById('setsAway'),
+            pointsHome: document.getElementById('pointsHome'),
+            pointsAway: document.getElementById('pointsAway'),
+            setHistory: document.getElementById('setHistory')
+        };
+
+        let pollInterval = null;
+        let lastVersion = 0;
+
+        /**
+         * Initialize the overlay
+         */
+        function init() {
+            applyConfig();
+            startPolling();
+        }
+
+        /**
+         * Apply configuration from URL params
+         */
+        function applyConfig() {
+            // Theme
+            document.documentElement.setAttribute('data-theme', config.theme);
+            if (config.theme === 'transparent') {
+                document.body.style.background = 'transparent';
+            }
+
+            // Style class
+            document.body.className = `style-${config.style}`;
+
+            // Font size
+            document.body.setAttribute('data-size', config.fontSize);
+
+            // Show set history
+            if (config.showSets) {
+                el.setHistory.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Start polling for scoreboard updates
+         */
+        function startPolling() {
+            // Initial fetch
+            fetchScoreboard();
+
+            // Poll every N ms
+            pollInterval = setInterval(fetchScoreboard, config.poll);
+        }
+
+        /**
+         * Fetch scoreboard data from server
+         */
+        async function fetchScoreboard() {
+            try {
+                const response = await fetch(`${API_BASE}/api/scout`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+
+                // Only update if version changed
+                if (data.version !== lastVersion) {
+                    lastVersion = data.version;
+                    updateDisplay(data.scoreboard);
+                }
+
+                hideError();
+            } catch (e) {
+                // Don't show error immediately, wait for retry
+                console.warn('[Overlay] Fetch error:', e.message);
+            }
+        }
+
+        /**
+         * Update scoreboard display
+         */
+        function updateDisplay(scoreboard) {
+            if (!scoreboard) {
+                el.scoreboard.classList.add('hidden');
+                el.waiting.classList.remove('hidden');
+                return;
+            }
+
+            // Show scoreboard
+            el.waiting.classList.add('hidden');
+            el.scoreboard.classList.remove('hidden');
+
+            // Team names
+            el.homeName.textContent = scoreboard.homeTeam || 'Heim';
+            el.awayName.textContent = scoreboard.awayTeam || 'Gast';
+
+            // Set score
+            animateValue(el.setsHome, scoreboard.homeSets || 0);
+            animateValue(el.setsAway, scoreboard.awaySets || 0);
+
+            // Current points
+            animateValue(el.pointsHome, scoreboard.homePoints || 0);
+            animateValue(el.pointsAway, scoreboard.awayPoints || 0);
+
+            // Set history
+            if (config.showSets && scoreboard.setHistory?.length > 0) {
+                updateSetHistory(scoreboard.setHistory);
+                el.setHistory.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Animate score value changes
+         */
+        function animateValue(element, newValue) {
+            const oldValue = element.textContent;
+            if (oldValue !== String(newValue)) {
+                element.classList.add('value-changed');
+                element.textContent = newValue;
+                setTimeout(() => element.classList.remove('value-changed'), 300);
+            }
+        }
+
+        /**
+         * Update set history display
+         */
+        function updateSetHistory(sets) {
+            el.setHistory.innerHTML = sets.map((set, i) => `
+                <div class="set-item">
+                    <span class="set-num">${i + 1}.</span>
+                    <span class="set-score">${set.home}:${set.away}</span>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Error handling
+         */
+        function hideError() {
+            el.error.classList.add('hidden');
+        }
+
+        function showError(message) {
+            el.error.classList.remove('hidden');
+            el.errorMessage.textContent = message || 'Verbindungsfehler';
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>

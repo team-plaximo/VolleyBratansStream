@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Hilfe - VolleyBratans</title>
+    <link rel="stylesheet" href="styles.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .help-page {
+            min-height: 100vh;
+            background: var(--bg-app);
+            padding: var(--space-6);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .help-header {
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .help-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--color-text);
+            margin-bottom: var(--space-2);
+        }
+
+        .help-subtitle {
+            color: var(--color-text-secondary);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            margin-bottom: var(--space-4);
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .help-section {
+            background: var(--color-surface-elevated);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-4);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        .help-section h2 {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--color-text);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-3);
+        }
+
+        .score-card {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--color-surface-container);
+            border-radius: var(--radius-default);
+        }
+
+        .score-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-default);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-bold);
+            font-size: var(--text-lg);
+            flex-shrink: 0;
+        }
+
+        .score-3 {
+            background: hsl(142 60% 32%);
+            color: white;
+        }
+
+        .score-2 {
+            background: hsl(173 80% 35%);
+            color: white;
+        }
+
+        .score-1 {
+            background: hsl(45 93% 40%);
+            color: white;
+        }
+
+        .score-0 {
+            background: hsl(0 84% 50%);
+            color: white;
+        }
+
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--space-3);
+        }
+
+        .shortcut-card {
+            padding: var(--space-3);
+            background: var(--color-surface-container);
+            border-radius: var(--radius-default);
+        }
+
+        .shortcut-card h4 {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--space-2);
+            color: var(--color-text);
+        }
+
+        kbd {
+            background: var(--color-surface-elevated);
+            border: 1px solid var(--color-border);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: var(--text-sm);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-list li {
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .position-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-top: var(--space-2);
+        }
+
+        .pos-badge {
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-default);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+        }
+
+        .pos-Z {
+            background: hsl(173 80% 40% / 0.15);
+            color: hsl(173 80% 35%);
+        }
+
+        .pos-D {
+            background: hsl(45 93% 47% / 0.15);
+            color: hsl(45 80% 35%);
+        }
+
+        .pos-AA {
+            background: hsl(142 71% 45% / 0.15);
+            color: hsl(142 60% 32%);
+        }
+
+        .pos-MB {
+            background: hsl(0 84% 60% / 0.15);
+            color: hsl(0 84% 45%);
+        }
+
+        .pos-L {
+            background: hsl(280 60% 50% / 0.15);
+            color: hsl(280 60% 40%);
+        }
+
+        .active-toggle-demo {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-top: var(--space-2);
+        }
+
+        .toggle-example {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .toggle-empty {
+            border: 2px dashed var(--color-border-strong);
+            background: transparent;
+        }
+
+        .toggle-active {
+            background: hsl(142 60% 32%);
+            border: 2px solid hsl(142 60% 32%);
+            position: relative;
+        }
+
+        .toggle-active::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cta-card {
+            background: var(--color-primary-subtle);
+            border: 1px solid var(--color-primary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+        }
+
+        .cta-card h3 {
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .cta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            background: var(--color-primary);
+            color: white;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-default);
+            text-decoration: none;
+            font-weight: var(--font-medium);
+            margin-top: var(--space-3);
+        }
+
+        .cta-link:hover {
+            background: var(--color-primary-hover);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="help-page">
+        <a href="index.html#statistics" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Zurück zum Scout
+        </a>
+
+        <header class="help-header">
+            <h1 class="help-title">📖 Scout Hilfe & Anleitung</h1>
+            <p class="help-subtitle">Vollständige Dokumentation aller Funktionen</p>
+        </header>
+
+        <!-- Bewertungsskala -->
+        <section class="help-section">
+            <h2>📊 Bewertungsskala (0-3)</h2>
+            <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">
+                Jede Aktion wird auf einer Skala von 0 bis 3 bewertet:
+            </p>
+            <div class="score-grid">
+                <div class="score-card">
+                    <div class="score-badge score-3">3</div>
+                    <div>
+                        <strong>Perfekt / Direkter Punkt</strong>
+                        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                            Aufschlag-Ass, Kill, Block-Point, perfekter Pass
+                        </p>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <div class="score-badge score-2">2</div>
+                    <div>
+                        <strong>Gut mit kleinen Mängeln</strong>
+                        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                            Angriff geblockt aber im Spiel, gute Annahme
+                        </p>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <div class="score-badge score-1">1</div>
+                    <div>
+                        <strong>Ohne Wirkung / Neutral</strong>
+                        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                            Ball im Spiel aber keine Wirkung für uns
+                        </p>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <div class="score-badge score-0">0</div>
+                    <div>
+                        <strong>Fehler = Punkt für Gegner</strong>
+                        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                            Aufschlagfehler, Netzfehler, Aus
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tastaturkürzel -->
+        <section class="help-section">
+            <h2>⌨️ Tastaturkürzel (Quick-Scout)</h2>
+            <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">
+                Schnelle Eingabe in 3 Schritten: <strong>Spieler → Element → Wertung</strong>
+            </p>
+            <div class="shortcut-grid">
+                <div class="shortcut-card">
+                    <h4>1️⃣ Spieler wählen</h4>
+                    <p><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> <kbd>5</kbd> <kbd>6</kbd> <kbd>7</kbd>
+                        <kbd>8</kbd> <kbd>9</kbd></p>
+                    <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: 8px;">Entspricht
+                        der Reihenfolge in der Liste</p>
+                </div>
+                <div class="shortcut-card">
+                    <h4>2️⃣ Element wählen</h4>
+                    <p>
+                        <kbd>A</kbd> = Aufschlag<br>
+                        <kbd>S</kbd> = Annahme (Serve-Receive)<br>
+                        <kbd>G</kbd> = Angriff<br>
+                        <kbd>B</kbd> = Block<br>
+                        <kbd>F</kbd> = Feldabwehr<br>
+                        <kbd>R</kbd> = Freeball
+                    </p>
+                </div>
+                <div class="shortcut-card">
+                    <h4>3️⃣ Wertung eingeben</h4>
+                    <p><kbd>0</kbd> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+                    <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: 8px;">Siehe
+                        Bewertungsskala oben</p>
+                </div>
+                <div class="shortcut-card">
+                    <h4>🔧 Aktionen</h4>
+                    <p>
+                        <kbd>Z</kbd> = Letzte Eingabe rückgängig<br>
+                        <kbd>?</kbd> = Hilfe anzeigen<br>
+                        <kbd>Esc</kbd> = Auswahl abbrechen
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Spielerverwaltung -->
+        <section class="help-section">
+            <h2>👥 Spieler verwalten</h2>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-icon">➕</span>
+                    <div>
+                        <strong>Spieler hinzufügen</strong>
+                        <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                            Klicke auf "Spieler" → Name eingeben und hinzufügen, oder wähle ein Preset aus
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">🗑️</span>
+                    <div>
+                        <strong>Spieler entfernen</strong>
+                        <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                            Hover über einen Spieler → Klicke auf das rote X rechts
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">↕️</span>
+                    <div>
+                        <strong>Spieler sortieren</strong>
+                        <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                            Ziehe Spieler an den Punkten (⋮⋮) links um die Reihenfolge zu ändern
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">#️⃣</span>
+                    <div>
+                        <strong>Trikotnummer ändern</strong>
+                        <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                            Klicke auf "#" oder die Nummer neben dem Spielernamen
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Positionen -->
+        <section class="help-section">
+            <h2>🏐 Positionen</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-3);">
+                Klicke auf das Badge neben dem Spielernamen um durch die Positionen zu cyclen:
+            </p>
+            <div class="position-badges">
+                <span class="pos-badge pos-Z"><strong>Z</strong> = Zuspieler</span>
+                <span class="pos-badge pos-D"><strong>D</strong> = Diagonal</span>
+                <span class="pos-badge pos-AA"><strong>AA</strong> = Außenannahme</span>
+                <span class="pos-badge pos-MB"><strong>MB</strong> = Mittelblock</span>
+                <span class="pos-badge pos-L"><strong>L</strong> = Libero</span>
+            </div>
+            <p style="color: var(--color-text-tertiary); font-size: var(--text-sm); margin-top: var(--space-3);">
+                Die Reihenfolge cycelt: ? → Z → D → AA → MB → L → ?
+            </p>
+        </section>
+
+        <!-- Startaufstellung -->
+        <section class="help-section">
+            <h2>✅ Startaufstellung (Starting Six)</h2>
+            <p style="color: var(--color-text-secondary);">
+                Das Rechteck links vom Spielernamen zeigt an, ob ein Spieler auf dem Feld steht:
+            </p>
+            <div class="active-toggle-demo">
+                <div class="toggle-example toggle-empty"></div>
+                <span>= Spieler auf der Bank</span>
+            </div>
+            <div class="active-toggle-demo">
+                <div class="toggle-example toggle-active"></div>
+                <span>= Spieler ist auf dem Feld (aktiv)</span>
+            </div>
+            <p style="color: var(--color-text-tertiary); font-size: var(--text-sm); margin-top: var(--space-3);">
+                Klicke auf das Rechteck um den Status zu wechseln. Aktive Spieler werden im Coach Dashboard
+                hervorgehoben.
+            </p>
+        </section>
+
+        <!-- Historie -->
+        <section class="help-section">
+            <h2>🔍 Historie & Korrektur</h2>
+            <p style="color: var(--color-text-secondary);">
+                Klicke auf den <strong>Durchschnittswert</strong> (z.B. "2.50") einer Zelle, um alle einzelnen Wertungen
+                zu sehen.
+                Von dort kannst du fehlerhafte Eingaben einzeln löschen.
+            </p>
+        </section>
+
+        <!-- Server Sync -->
+        <section class="help-section">
+            <h2>☁️ Server-Synchronisation</h2>
+            <p style="color: var(--color-text-secondary);">
+                Alle Daten werden automatisch alle 5 Sekunden mit dem Server synchronisiert.
+                Der Status wird oben rechts angezeigt (grün = verbunden, grau = offline).
+            </p>
+            <p style="color: var(--color-text-tertiary); font-size: var(--text-sm); margin-top: var(--space-2);">
+                Bei Verbindungsproblemen werden Änderungen lokal gespeichert und beim nächsten Sync übertragen.
+            </p>
+        </section>
+
+        <!-- Coach Dashboard CTA -->
+        <div class="cta-card">
+            <h3>📋 Coach Dashboard</h3>
+            <p style="color: var(--color-text-secondary);">
+                Separate Seite mit allen wichtigen Live-Statistiken für Trainer – optimiert für schnellen Überblick
+                während des Spiels.
+            </p>
+            <a href="coach.html" class="cta-link">
+                Coach Dashboard öffnen
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

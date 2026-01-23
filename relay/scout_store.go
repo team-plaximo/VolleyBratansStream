@@ -22,14 +22,34 @@ type ScoutPlayer struct {
 	Scores  map[string][]int    `json:"scores"`
 }
 
+// SetScore represents the score of a single set
+type SetScore struct {
+	Home int `json:"home"`
+	Away int `json:"away"`
+}
+
+// ScoreboardData holds the current match score
+type ScoreboardData struct {
+	HomeTeam   string     `json:"homeTeam"`
+	AwayTeam   string     `json:"awayTeam"`
+	HomeSets   int        `json:"homeSets"`
+	AwaySets   int        `json:"awaySets"`
+	HomePoints int        `json:"homePoints"`
+	AwayPoints int        `json:"awayPoints"`
+	CurrentSet int        `json:"currentSet"`
+	SetHistory []SetScore `json:"setHistory"`
+}
+
 // ScoutState represents the complete match scouting state
 type ScoutState struct {
-	Version     int64         `json:"version"`
-	LastUpdated string        `json:"lastUpdated"`
-	MatchName   string        `json:"matchName"`
-	MatchDate   string        `json:"matchDate"`
-	Players     []ScoutPlayer `json:"players"`
+	Version     int64          `json:"version"`
+	LastUpdated string         `json:"lastUpdated"`
+	MatchName   string         `json:"matchName"`
+	MatchDate   string         `json:"matchDate"`
+	Players     []ScoutPlayer  `json:"players"`
+	Scoreboard  ScoreboardData `json:"scoreboard"`
 }
+
 
 // ScoutStore manages persistent storage of scout state
 type ScoutStore struct {

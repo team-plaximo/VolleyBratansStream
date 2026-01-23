@@ -1,0 +1,428 @@
+/**
+ * Volleyball Ticker Overlay - Compact Stream Design
+ * Minimal horizontal scoreboard for OBS/stream embedding
+ */
+
+/* ============================================
+   CSS Custom Properties
+   ============================================ */
+
+:root {
+    /* Plaximo Teal Primary */
+    --color-primary: hsl(174, 61%, 45%);
+    --color-primary-light: hsl(174, 61%, 55%);
+
+    /* Dark Theme */
+    --bg-scoreboard: rgba(15, 20, 25, 0.95);
+    --bg-score: rgba(0, 0, 0, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: hsl(0, 0%, 98%);
+    --text-secondary: hsl(0, 0%, 70%);
+
+    /* Status Colors */
+    --color-live: hsl(0, 80%, 55%);
+    --color-serving: var(--color-primary);
+
+    /* Spacing */
+    --gap-sm: 6px;
+    --gap-md: 12px;
+    --gap-lg: 16px;
+
+    /* Border Radius */
+    --radius: 6px;
+
+    /* Typography */
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-scoreboard: rgba(255, 255, 255, 0.95);
+    --bg-score: rgba(0, 0, 0, 0.08);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --text-primary: hsl(220, 15%, 15%);
+    --text-secondary: hsl(220, 10%, 40%);
+}
+
+/* Transparent Theme (for stream overlay) */
+[data-theme="transparent"] {
+    --bg-scoreboard: rgba(0, 0, 0, 0.75);
+    --bg-score: rgba(0, 0, 0, 0.5);
+    --border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   Base
+   ============================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    font-family: var(--font);
+    background: transparent;
+    min-height: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   Container & Positioning
+   ============================================ */
+
+.overlay-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    padding: 8px;
+}
+
+/* Position options */
+[data-position="top-left"] {
+    align-items: flex-start;
+}
+
+[data-position="top-right"] {
+    align-items: flex-end;
+}
+
+[data-position="center"] {
+    align-items: center;
+}
+
+[data-position="bottom-left"] {
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-height: 100vh;
+}
+
+[data-position="bottom-right"] {
+    align-items: flex-end;
+    justify-content: flex-end;
+    min-height: 100vh;
+}
+
+/* ============================================
+   States (Loading, Error, Waiting)
+   ============================================ */
+
+.overlay-loading,
+.overlay-error,
+.overlay-waiting {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-md);
+    background: var(--bg-scoreboard);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-text,
+.waiting-text {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================
+   Scoreboard (Compact Horizontal Bar)
+   ============================================ */
+
+.scoreboard {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+    background: var(--bg-scoreboard);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: var(--gap-sm) var(--gap-md);
+    backdrop-filter: blur(8px);
+    position: relative;
+}
+
+/* Team */
+.team {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.team-away {
+    flex-direction: row-reverse;
+}
+
+.team-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.team-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Score Block */
+.score-block {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.sets-score {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--color-primary);
+    padding: 4px 10px;
+    border-radius: var(--radius);
+}
+
+.sets-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    min-width: 1ch;
+    text-align: center;
+}
+
+.sets-divider {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.points-score {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--bg-score);
+    padding: 4px 8px;
+    border-radius: var(--radius);
+}
+
+.points-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 1.5ch;
+    text-align: center;
+}
+
+.points-divider {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Score Change Animation */
+.value-changed {
+    animation: valueChange 0.3s ease;
+}
+
+@keyframes valueChange {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+        color: var(--color-primary-light);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Serving Indicator */
+.serving-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.serving-indicator[data-serving="home"] {
+    left: 8px;
+}
+
+.serving-indicator[data-serving="away"] {
+    right: 8px;
+}
+
+.serving-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: var(--color-serving);
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Live Badge */
+.live-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--color-live);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    animation: pulse 2s infinite;
+}
+
+/* ============================================
+   Set History (Optional)
+   ============================================ */
+
+.set-history {
+    display: flex;
+    gap: var(--gap-sm);
+    padding: var(--gap-sm) var(--gap-md);
+    background: var(--bg-scoreboard);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.set-item {
+    display: flex;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.set-num {
+    font-weight: 500;
+}
+
+.set-score {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ============================================
+   Style Variations
+   ============================================ */
+
+/* Minimal Style - Points only */
+.style-minimal .team-logo,
+.style-minimal .team-name,
+.style-minimal .serving-indicator,
+.style-minimal .live-badge,
+.style-minimal .set-history {
+    display: none !important;
+}
+
+.style-minimal .scoreboard {
+    padding: var(--gap-sm);
+}
+
+/* Full Style - Everything visible */
+.style-full .set-history {
+    display: flex;
+}
+
+/* ============================================
+   Size Variations
+   ============================================ */
+
+[data-size="small"] {
+    --gap-sm: 4px;
+    --gap-md: 8px;
+}
+
+[data-size="small"] .team-name {
+    font-size: 11px;
+    max-width: 80px;
+}
+
+[data-size="small"] .sets-value {
+    font-size: 14px;
+}
+
+[data-size="small"] .points-value {
+    font-size: 12px;
+}
+
+[data-size="small"] .team-logo {
+    width: 18px;
+    height: 18px;
+}
+
+[data-size="large"] {
+    --gap-sm: 8px;
+    --gap-md: 16px;
+}
+
+[data-size="large"] .team-name {
+    font-size: 16px;
+    max-width: 160px;
+}
+
+[data-size="large"] .sets-value {
+    font-size: 24px;
+}
+
+[data-size="large"] .points-value {
+    font-size: 18px;
+}
+
+[data-size="large"] .team-logo {
+    width: 32px;
+    height: 32px;
+}
+
+/* ============================================
+   Print / Screenshot
+   ============================================ */
+
+@media print {
+    body {
+        background: transparent !important;
+    }
+}
