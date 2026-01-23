@@ -681,6 +681,18 @@ class UIController {
             logExportBtn: document.getElementById('logExportBtn'),
             logCount: document.getElementById('logCount'),
             logBadge: document.getElementById('logBadge'),
+
+            // QR Code Modal
+            qrConnectBtn: document.getElementById('qrConnectBtn'),
+            qrModalOverlay: document.getElementById('qrModalOverlay'),
+            qrModalClose: document.getElementById('qrModalClose'),
+            qrRelayPassword: document.getElementById('qrRelayPassword'),
+            qrRelayUrl: document.getElementById('qrRelayUrl'),
+            qrGenerateBtn: document.getElementById('qrGenerateBtn'),
+            qrCodeContainer: document.getElementById('qrCodeContainer'),
+            qrStep1: document.getElementById('qrStep1'),
+            qrStep2: document.getElementById('qrStep2'),
+            qrResetBtn: document.getElementById('qrResetBtn'),
         };
 
         this.logPanelOpen = false;
@@ -1419,6 +1431,92 @@ class MoblinMultiRemote {
 
         // Log system startup
         eventLogger.system('Moblin Multi-Remote Control initialized');
+
+        // QR Code Modal Events
+        this.bindQrEvents();
+    }
+
+    bindQrEvents() {
+        // Open Modal
+        this.ui.elements.qrConnectBtn?.addEventListener('click', () => {
+            if (this.ui.elements.qrModalOverlay) {
+                this.ui.elements.qrModalOverlay.classList.remove('hidden');
+                // Reset state
+                this.resetQrModal();
+            }
+        });
+
+        // Close Modal
+        this.ui.elements.qrModalClose?.addEventListener('click', () => {
+            this.ui.elements.qrModalOverlay?.classList.add('hidden');
+        });
+
+        // Generate QR
+        this.ui.elements.qrGenerateBtn?.addEventListener('click', () => {
+            this.generateQrCode();
+        });
+
+        // Reset
+        this.ui.elements.qrResetBtn?.addEventListener('click', () => {
+            this.resetQrModal();
+        });
+
+        // Close on overlay click
+        this.ui.elements.qrModalOverlay?.addEventListener('click', (e) => {
+            if (e.target === this.ui.elements.qrModalOverlay) {
+                this.ui.elements.qrModalOverlay.classList.add('hidden');
+            }
+        });
+    }
+
+    resetQrModal() {
+        this.ui.elements.qrStep1?.classList.remove('hidden');
+        this.ui.elements.qrStep2?.classList.add('hidden');
+        if (this.ui.elements.qrCodeContainer) this.ui.elements.qrCodeContainer.innerHTML = '';
+        if (this.ui.elements.qrRelayPassword) this.ui.elements.qrRelayPassword.value = '';
+    }
+
+    generateQrCode() {
+        const password = this.ui.elements.qrRelayPassword?.value.trim();
+        const url = this.ui.elements.qrRelayUrl?.value.trim();
+
+        if (!password) {
+            alert('Bitte ein Passwort eingeben.');
+            return;
+        }
+
+        const config = {
+            url: url,
+            password: password
+        };
+
+        // Custom Moblin/OBS Relay format
+        // Some apps expect just the JSON.
+        const payload = JSON.stringify(config);
+
+        // Clear previous
+        if (this.ui.elements.qrCodeContainer) {
+            this.ui.elements.qrCodeContainer.innerHTML = '';
+
+            try {
+                // Generate
+                new QRCode(this.ui.elements.qrCodeContainer, {
+                    text: payload,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#e0e0e0", // Light color for dark theme
+                    colorLight: "#1e1e1e", // Dark background
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                // Show step 2
+                this.ui.elements.qrStep1?.classList.add('hidden');
+                this.ui.elements.qrStep2?.classList.remove('hidden');
+            } catch (e) {
+                console.error('QR Gen Error:', e);
+                alert('Fehler beim Erstellen des QR Codes. Ist die Bibliothek geladen?');
+            }
+        }
     }
 
     onDeviceStateChange(deviceId, state) {

@@ -9,7 +9,7 @@
     <meta name="keywords" content="volleyball, streaming, remote control, live streaming, mobile streaming, sports">
     <meta name="author" content="VolleyBratans">
     <title>VolleyBratans Stream Platform</title>
-    <link rel="stylesheet" href="styles.css?v=6">
+    <link rel="stylesheet" href="styles.css?v=7">
     <!-- Async Google Fonts Loading (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         media="print" onload="this.media='all'">
+    <!-- QRCode Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <noscript>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     </noscript>
@@ -211,7 +213,19 @@
                 <div class="dashboard-section">
                     <div class="dashboard-section-header">
                         <h2 class="dashboard-section-title">Camera Overview</h2>
-                        <a href="#cameras" class="dashboard-section-link" data-navigate="cameras">View All →</a>
+                        <div class="header-actions">
+                            <button class="btn-secondary-sm" id="qrConnectBtn">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                QR Connect
+                            </button>
+                            <a href="#cameras" class="dashboard-section-link" data-navigate="cameras">View All →</a>
+                        </div>
                     </div>
                     <div class="dashboard-camera-grid" id="dashCameraGrid">
                         <!-- Camera mini-cards injected by JS -->
@@ -778,6 +792,41 @@
                 <div class="modal-actions">
                     <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
                     <button class="btn-primary" id="saveProfileBtn">Save Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Moblin QR Code Modal -->
+        <div class="modal-overlay hidden" id="qrModalOverlay">
+            <div class="modal modal-qr">
+                <div class="modal-header">
+                    <h3 class="modal-title">Moblin Connect</h3>
+                    <button class="modal-close" id="qrModalClose">×</button>
+                </div>
+
+                <div class="qr-setup-step" id="qrStep1">
+                    <p class="modal-subtitle">1. Relay Passwort eingeben</p>
+                    <div class="form-group">
+                        <label class="form-label">Relay Passwort</label>
+                        <input type="password" class="form-input" id="qrRelayPassword"
+                            placeholder="Aus .env Datei (z.B. Volley2024!)">
+                        <p class="form-hint">Das Passwort, das im Moblin Relay Server konfiguriert ist.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Optional: Moblin Server URL</label>
+                        <input type="text" class="form-input" id="qrRelayUrl"
+                            value="wss://stream.volleybratans.com/ws?type=moblin">
+                    </div>
+                    <button class="btn-primary" id="qrGenerateBtn">QR Code erstellen</button>
+                </div>
+
+                <div class="qr-display-step hidden" id="qrStep2">
+                    <p class="modal-subtitle">2. Scannen mit Moblin App</p>
+                    <div class="qr-code-container" id="qrCodeContainer"></div>
+                    <p class="qr-instructions">
+                        Öffne Moblin > Einstellungen > Connection > Scan QR code
+                    </p>
+                    <button class="btn-secondary" id="qrResetBtn">Zurück</button>
                 </div>
             </div>
         </div>

@@ -5119,3 +5119,66 @@ tr.scout-libero {
     background: var(--color-success-subtle);
     color: var(--color-success);
 }
+
+/* ========================================
+   QR Code Modal Styles
+   ======================================== */
+
+.modal-qr {
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-qr .form-group {
+    margin-bottom: 20px;
+}
+
+.qr-code-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border-radius: var(--radius-lg);
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.qr-code-container img {
+    display: block;
+    /* Remove gap */
+}
+
+.qr-instructions {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.qr-setup-step,
+.qr-display-step {
+    transition: opacity 0.3s ease;
+}
+
+/* Button Small Variants */
+.btn-secondary-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-secondary-sm:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-surface-hover);
+    color: var(--text-main);
+}
