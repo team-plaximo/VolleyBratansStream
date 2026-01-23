@@ -399,8 +399,9 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	port := flag.Int("port", 8080, "Server port")
-	password := flag.String("password", "", "Optional password for authentication")
-	dataDir := flag.String("data", "./data", "Data directory for scout state persistence")
+	password := flag.String("password", "", "Optional password for WebSocket authentication")
+	dataDir := flag.String("data", "./data", "Data directory for state persistence")
+	authPIN := flag.String("pin", "", "6-digit PIN for web authentication (env: AUTH_PIN)")
 	flag.Parse()
 
 	// Initialize Scout Store
@@ -409,6 +410,9 @@ func main() {
 		log.Fatalf("Failed to initialize scout store: %v", err)
 	}
 	log.Printf("[SCOUT] State store initialized at %s", *dataDir)
+
+	// Initialize Authentication System
+	InitAuth(*dataDir, *authPIN)
 
 	relay := NewRelay(*password)
 	go relay.Run()
@@ -420,24 +424,63 @@ func main() {
 		webDir = "../web"
 	}
 	log.Printf("[SERVER] Serving static files from: %s", webDir)
-	http.Handle("/", http.FileServer(http.Dir(webDir)))
+	
+	// Custom file server with auth for protected pages
+	fileServer := http.FileServer(http.Dir(webDir))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		
+		// Public paths (no auth required)
+		publicPaths := []string{
+			"/login.html",
+			"/health",
+			"/favicon.ico",
+			"/styles.css",
+			"/overlay/", // Overlays are public for OBS
+		}
+		
+		isPublic := false
+		for _, pp := range publicPaths {
+			if strings.HasPrefix(path, pp) || path == pp {
+				isPublic = true
+				break
+			}
+		}
+		
+		// Root path needs auth check
+		if path == "/" || path == "/index.html" || !isPublic {
+			session := getSessionFromCookie(r)
+			if session == nil {
+				http.Redirect(w, r, "/login.html", http.StatusFound)
+				return
+			}
+			authConfig.SessionStore.Touch(session.ID)
+		}
+		
+		fileServer.ServeHTTP(w, r)
+	})
 
-	// WebSocket endpoint
+	// WebSocket endpoint (uses its own password auth)
 	http.HandleFunc("/ws", relay.ServeWS)
 
-	// Health check endpoint
+	// Health check endpoint (public)
 	http.HandleFunc("/health", healthHandler)
 
-	// Scout API endpoints
-	http.HandleFunc("/api/scout", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	// ========== AUTH ENDPOINTS ==========
+	http.HandleFunc("/api/auth/login", corsMiddleware(handleLogin))
+	http.HandleFunc("/api/auth/logout", corsMiddleware(handleLogout))
+	http.HandleFunc("/api/auth/session", corsMiddleware(handleSession))
+
+	// ========== PROTECTED API ENDPOINTS ==========
+	http.HandleFunc("/api/scout", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handleScoutAPI(w, r, scoutStore, relay)
-	}))
-	http.HandleFunc("/api/scout/version", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	})))
+	http.HandleFunc("/api/scout/version", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handleScoutVersion(w, r, scoutStore)
-	}))
-	http.HandleFunc("/api/scout/archive", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	})))
+	http.HandleFunc("/api/scout/archive", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handleScoutArchive(w, r, scoutStore)
-	}))
+	})))
 
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("╔════════════════════════════════════════════════╗")
@@ -447,11 +490,11 @@ func main() {
 	log.Printf("║  Web UI:     http://localhost%s              ║", addr)
 	log.Printf("║  Health:     http://localhost%s/health       ║", addr)
 	log.Printf("║  Scout API:  http://localhost%s/api/scout    ║", addr)
-	if *password != "" {
-		log.Printf("║  Auth:       Password protected               ║")
-	} else {
-		log.Printf("║  Auth:       None (open)                       ║")
-	}
+	log.Printf("╠════════════════════════════════════════════════╣")
+	log.Printf("║  ⚡ SECURITY ENABLED                            ║")
+	log.Printf("║  Login:      http://localhost%s/login.html   ║", addr)
+	log.Printf("║  Rate Limit: 100 req/min per IP                ║")
+	log.Printf("║  Sessions:   30-day persistent                 ║")
 	log.Printf("╚════════════════════════════════════════════════╝")
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
