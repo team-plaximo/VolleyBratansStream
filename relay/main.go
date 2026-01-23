@@ -502,14 +502,22 @@ func main() {
 	}
 }
 
-// corsMiddleware adds CORS headers for API endpoints
+// corsMiddleware adds CORS and security headers for API endpoints
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Security headers (always set)
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+
+		// CORS headers (only for allowed origins)
 		origin := r.Header.Get("Origin")
 		if origin != "" && isOriginAllowed(origin) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
 
 		if r.Method == "OPTIONS" {
