@@ -1323,7 +1323,11 @@ a svg,
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
     display: flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
     justify-content: center;
 }
 
@@ -2743,6 +2747,10 @@ a svg,
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease-out;
+    justify-content: center;
+    z-index: 1000;
 }
 
 .scout-modal {
@@ -3830,7 +3838,8 @@ body {
 .scout-quick-indicator {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 90;
+    /* Below modals (z-index 1000) */
     display: flex;
     align-items: center;
     justify-content: center;
