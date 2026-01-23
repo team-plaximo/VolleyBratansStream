@@ -4052,22 +4052,41 @@ tr.scout-drop-below {
 }
 
 /* ========================================
-   Starting 6 + Libero Markers
+   Starting 6 + Libero Markers (Yellow Box)
    ======================================== */
 
-/* Starting 6 Highlight - Simple left border */
+/* Starting 6 Highlight - Yellow/Amber full border box */
 tr.scout-starting-six {
-    border-left: 4px solid hsl(var(--teal-500)) !important;
+    border: 2px solid #fbbf24 !important;
+    /* Amber-400 (Yellow) */
+    background-color: rgba(251, 191, 36, 0.08);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.15);
 }
 
-/* Divider after starting 6 */
+/* Divider after starting 6 group */
 tr.scout-starting-six:last-of-type {
-    border-bottom: 2px solid hsl(var(--teal-500) / 0.5);
+    border-bottom: 3px solid #fbbf24 !important;
 }
 
-/* Libero Highlight (7th position) - Orange left border */
+/* Libero Highlight (Position L) - Orange-accented box */
 tr.scout-libero {
-    border-left: 4px solid hsl(var(--warning-500)) !important;
+    border: 2px solid #f97316 !important;
+    /* Orange-500 */
+    background-color: rgba(249, 115, 22, 0.08);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
+}
+
+/* Dark mode adjustments for yellow box */
+[data-theme="dark"] tr.scout-starting-six {
+    background-color: rgba(251, 191, 36, 0.12);
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+
+[data-theme="dark"] tr.scout-libero {
+    background-color: rgba(249, 115, 22, 0.12);
+    box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25);
 }
 
 /* Position Badge */
@@ -4221,7 +4240,9 @@ tr.scout-libero {
 
 .scout-help-list strong {
     color: var(--primary);
-}/* ========================================
+}
+
+/* ========================================
    SCOREBOARD CONTROL PANEL
    Live Score Entry for Stream Overlay
    ======================================== */
@@ -4244,8 +4265,13 @@ tr.scout-libero {
     gap: var(--space-3);
 }
 
-.sb-home { flex-direction: row; }
-.sb-away { flex-direction: row-reverse; }
+.sb-home {
+    flex-direction: row;
+}
+
+.sb-away {
+    flex-direction: row-reverse;
+}
 
 .sb-team-input {
     width: 140px;
@@ -4380,16 +4406,16 @@ tr.scout-libero {
         gap: var(--space-4);
         padding: var(--space-3);
     }
-    
+
     .sb-team-input {
         width: 100px;
         font-size: var(--text-sm);
     }
-    
+
     .sb-points-value {
         font-size: var(--text-2xl);
     }
-    
+
     .sb-sets-value {
         font-size: var(--text-3xl);
     }

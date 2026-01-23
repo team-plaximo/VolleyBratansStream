@@ -306,6 +306,19 @@
     </style>
 </head>
 
+<!-- Shared config (must load first) -->
+<script src="config.js?v=1"></script>
+
+<!-- Client-side auth check (backup for cached pages) -->
+<script>
+    (function () {
+        fetch('/api/auth/session', { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
+            .catch(() => window.location.href = '/login.html');
+    })();
+</script>
+
 <body>
     <div class="coach-dashboard" id="coachDashboard">
         <a href="index.html#statistics" class="back-link">
@@ -413,22 +426,13 @@
 
     <script>
         // Coach Dashboard Logic
-        const STORAGE_KEY = 'volleybratans_scout';
+        // Use shared config if available
+        const STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
         let data = null;
         let refreshInterval = null;
 
-        // Determine API base
-        function getApiBase() {
-            if (window.location.protocol === 'file:') {
-                return 'http://localhost:8080';
-            }
-            if (window.location.port === '5000') {
-                return `${window.location.protocol}//${window.location.hostname}:8080`;
-            }
-            return '';
-        }
-
-        const API_BASE = getApiBase();
+        // Use shared getApiBase if available
+        const API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : '';
 
         // Load data from server or localStorage
         async function loadData() {

@@ -269,6 +269,16 @@
     </style>
 </head>
 
+<!-- Client-side auth check (backup for cached pages) -->
+<script>
+    (function () {
+        fetch('/api/auth/session', { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
+            .catch(() => window.location.href = '/login.html');
+    })();
+</script>
+
 <body>
     <div class="help-page">
         <a href="index.html#statistics" class="back-link">
@@ -339,7 +349,8 @@
                 <div class="shortcut-card">
                     <h4>1️⃣ Spieler wählen</h4>
                     <p><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> <kbd>5</kbd> <kbd>6</kbd> <kbd>7</kbd>
-                        <kbd>8</kbd> <kbd>9</kbd></p>
+                        <kbd>8</kbd> <kbd>9</kbd>
+                    </p>
                     <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: 8px;">Entspricht
                         der Reihenfolge in der Liste</p>
                 </div>

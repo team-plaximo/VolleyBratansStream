@@ -5,7 +5,8 @@
 
 class Scoreboard {
     constructor() {
-        this.STORAGE_KEY = 'volleybratans_scoreboard';
+        // Use shared config if available, fallback for standalone usage
+        this.STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOREBOARD || 'volleybratans_scoreboard';
 
         // DOM Elements
         this.el = {
@@ -24,14 +25,18 @@ class Scoreboard {
         // State
         this.data = this.loadData();
 
-        // API Base
-        this.API_BASE = this.getApiBase();
+        // API Base - use shared getApiBase if available
+        this.API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : this._getApiBaseFallback();
         this.syncInterval = null;
 
         this.init();
     }
 
-    getApiBase() {
+    /**
+     * Fallback API base URL determination (used if config.js not loaded)
+     * @private
+     */
+    _getApiBaseFallback() {
         if (window.location.protocol === 'file:') {
             return 'http://localhost:8080';
         }

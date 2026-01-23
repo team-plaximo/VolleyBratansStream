@@ -11,7 +11,8 @@
 
 class ScoutEngine {
     constructor() {
-        this.STORAGE_KEY = 'volleybratans_scout';
+        // Use shared config if available, fallback for standalone usage
+        this.STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
         this.ELEMENTS = ['aufschlag', 'annahme', 'angriff', 'block', 'feldabwehr', 'freeball'];
 
         // Thresholds based on Merkblatt
@@ -54,8 +55,8 @@ class ScoutEngine {
         };
         this.POSITION_KEYS = ['Z', 'D', 'AA', 'MB', 'L'];
 
-        // Server sync configuration
-        this.API_BASE = this.getApiBase();
+        // Server sync configuration - use shared getApiBase if available
+        this.API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : this._getApiBaseFallback();
         this.syncInterval = null;
         this.serverVersion = 0;
         this.isSyncing = false;
@@ -70,26 +71,16 @@ class ScoutEngine {
     }
 
     /**
-     * Determines the API base URL based on current location
+     * Fallback API base URL determination (used if config.js not loaded)
+     * @private
      */
-    getApiBase() {
-        // If loaded from file://, assume local backend on 8080
+    _getApiBaseFallback() {
         if (window.location.protocol === 'file:') {
             return 'http://localhost:8080';
         }
-
-        // Special case for local dev with npx serve (default port 5000 or 3000 without proxy)
-        // If we find we are on port 5000, we assume no proxy and point to relay.
-        // If on 3000, it could be Nginx (proxied) or React Dev (needs proxy setup).
-        // Let's assume 5000 is always unproxied.
         if (window.location.port === '5000') {
-            // Reconstruct protocol + hostname + 8080
             return `${window.location.protocol}//${window.location.hostname}:8080`;
         }
-
-        // If explicitly running on different dev port (e.g. 5000) and NOT proxied, 
-        // one might need logic here, but for Docker/Nginx/Caddy, relative path is correct.
-        // We return empty string to use current origin.
         return '';
     }
 

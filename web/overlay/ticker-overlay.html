@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="ticker-overlay.css">
 </head>
 
+<!-- Shared config (must load first) -->
+<script src="../config.js?v=1"></script>
+
 <body class="style-scoreboard">
     <!-- Overlay Container -->
     <div class="overlay-container" id="overlayContainer" data-position="center">
@@ -89,17 +92,12 @@
             fontSize: urlParams.get('fontSize') || 'medium'
         };
 
-        // API Base URL
-        function getApiBase() {
-            if (window.location.protocol === 'file:') {
-                return 'http://localhost:8080';
-            }
-            if (window.location.port === '5000') {
-                return `${window.location.protocol}//${window.location.hostname}:8080`;
-            }
+        // API Base URL - use shared config if available, with inline fallback
+        const API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : (function () {
+            if (window.location.protocol === 'file:') return 'http://localhost:8080';
+            if (window.location.port === '5000') return `${window.location.protocol}//${window.location.hostname}:8080`;
             return '';
-        }
-        const API_BASE = getApiBase();
+        })();
 
         // DOM Elements
         const el = {
