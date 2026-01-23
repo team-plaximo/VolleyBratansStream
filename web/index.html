@@ -22,6 +22,15 @@
     </noscript>
 </head>
 
+<!-- Client-side auth check (backup for cached pages) -->
+<script>
+    (function () {
+        fetch('/api/auth/session', { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
+            .catch(() => window.location.href = '/login.html');
+    })();
+</script>
 
 <body>
     <div class="app">
