@@ -383,6 +383,14 @@ class ScoutEngine {
         const player = this.data.players.find(p => p.id == playerId);
         if (!player) return;
 
+        // Push to undo stack
+        this.addToUndoStack({
+            type: 'add',
+            playerId: player.id,
+            element: element,
+            score: score
+        });
+
         player.stats[element].push(score);
         this.saveData();
         this.render();
@@ -395,6 +403,13 @@ class ScoutEngine {
         player.stats[element].pop();
         this.saveData();
         this.render();
+    }
+
+    addToUndoStack(action) {
+        this.undoStack.push(action);
+        if (this.undoStack.length > 10) {
+            this.undoStack.shift();
+        }
     }
 
     calculateAverage(scores) {
@@ -873,6 +888,16 @@ class ScoutEngine {
 
         const scores = player.stats[element];
         if (index < 0 || index >= scores.length) return;
+
+        // Capture score for undo
+        const score = scores[index];
+        this.addToUndoStack({
+            type: 'delete',
+            playerId: playerId,
+            element: element,
+            index: index,
+            score: score
+        });
 
         // Remove the score at the specific index
         scores.splice(index, 1);
@@ -1797,20 +1822,11 @@ class ScoutEngine {
 
         if (playerIndex === null || !element) return;
 
+        // Check if player exists
         const player = this.data.players[playerIndex];
         if (!player) return;
 
-        // Add to undo stack before making change
-        this.undoStack.push({
-            playerId: player.id,
-            element: element,
-            score: score
-        });
-
-        // Keep stack limited to 10 entries
-        if (this.undoStack.length > 10) {
-            this.undoStack.shift();
-        }
+        // NOTE: Undo stack push is now handled in this.addScore()
 
         // Add the score
         this.addScore(player.id, element, score);
@@ -1832,8 +1848,28 @@ class ScoutEngine {
         }
 
         const lastAction = this.undoStack.pop();
-        this.undoLastScore(lastAction.playerId, lastAction.element);
-        this.showQuickFeedback(`Rückgängig: ${lastAction.score} ${this.ELEMENT_LABELS[lastAction.element]}`);
+
+        if (lastAction.type === 'delete') {
+            // Restore deleted score
+            const player = this.data.players.find(p => p.id == lastAction.playerId);
+            if (player && player.stats[lastAction.element]) {
+                player.stats[lastAction.element].splice(lastAction.index, 0, lastAction.score);
+                this.saveData();
+                this.render();
+
+                // Refresh modal if open
+                if (this.currentHistoryPlayer === lastAction.playerId &&
+                    this.currentHistoryElement === lastAction.element) {
+                    this.showScoreHistoryModal(lastAction.playerId, lastAction.element);
+                }
+
+                this.showQuickFeedback(`Wiederhergestellt: ${lastAction.score} ${this.ELEMENT_LABELS[lastAction.element]}`);
+            }
+        } else {
+            // Undo 'add' (default)
+            this.undoLastScore(lastAction.playerId, lastAction.element);
+            this.showQuickFeedback(`Rückgängig: ${lastAction.score} ${this.ELEMENT_LABELS[lastAction.element]}`);
+        }
     }
 
     /**

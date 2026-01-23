@@ -9,315 +9,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Coach Dashboard Specific Styles */
-        .coach-dashboard {
-            min-height: 100vh;
-            background: var(--bg-app);
-            padding: var(--space-4);
-        }
+    <!-- Coach dashboard styles now in styles.css (coach-* classes) -->
 
-        .coach-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-6);
-            padding-bottom: var(--space-4);
-            border-bottom: 1px solid var(--color-border);
-        }
+    <!-- Shared config (must load first) -->
+    <script src="config.js?v=1"></script>
 
-        .coach-title {
-            font-size: var(--text-2xl);
-            font-weight: var(--font-bold);
-            color: var(--color-text);
-        }
-
-        .coach-subtitle {
-            font-size: var(--text-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-            padding: var(--space-2) var(--space-3);
-            background: hsl(142 60% 32% / 0.1);
-            border-radius: var(--radius-full);
-            color: hsl(142 60% 32%);
-            font-weight: var(--font-medium);
-            font-size: var(--text-sm);
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: hsl(142 60% 32%);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-4);
-            margin-bottom: var(--space-6);
-        }
-
-        .stat-card {
-            background: var(--color-surface-elevated);
-            border-radius: var(--radius-lg);
-            padding: var(--space-5);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--color-border);
-        }
-
-        .stat-label {
-            font-size: var(--text-sm);
-            color: var(--color-text-secondary);
-            margin-bottom: var(--space-2);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: var(--font-medium);
-        }
-
-        .stat-value {
-            font-size: var(--text-3xl);
-            font-weight: var(--font-bold);
-            color: var(--color-text);
-        }
-
-        .stat-value.good {
-            color: hsl(142 60% 32%);
-        }
-
-        .stat-value.ok {
-            color: hsl(45 93% 40%);
-        }
-
-        .stat-value.bad {
-            color: hsl(0 84% 50%);
-        }
-
-        .stat-trend {
-            font-size: var(--text-xs);
-            color: var(--color-text-tertiary);
-            margin-top: var(--space-1);
-        }
-
-        /* Starting Six Section */
-        .section-title {
-            font-size: var(--text-lg);
-            font-weight: var(--font-semibold);
-            color: var(--color-text);
-            margin-bottom: var(--space-4);
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-        }
-
-        .section-badge {
-            background: var(--color-primary-subtle);
-            color: var(--color-primary);
-            padding: var(--space-1) var(--space-2);
-            border-radius: var(--radius-default);
-            font-size: var(--text-xs);
-            font-weight: var(--font-medium);
-        }
-
-        .starting-six-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--space-4);
-            margin-bottom: var(--space-6);
-        }
-
-        .player-card {
-            background: var(--color-surface-elevated);
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--color-border);
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-3);
-        }
-
-        .player-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-        }
-
-        .player-number {
-            width: 36px;
-            height: 36px;
-            background: var(--color-primary);
-            color: white;
-            border-radius: var(--radius-default);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: var(--font-bold);
-            font-size: var(--text-sm);
-        }
-
-        .player-name {
-            font-weight: var(--font-semibold);
-            color: var(--color-text);
-        }
-
-        .player-position {
-            font-size: var(--text-xs);
-            color: var(--color-text-secondary);
-        }
-
-        .player-stats-mini {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-2);
-        }
-
-        .mini-stat {
-            text-align: center;
-            padding: var(--space-2);
-            background: var(--color-surface-container);
-            border-radius: var(--radius-default);
-        }
-
-        .mini-stat-label {
-            font-size: var(--text-xs);
-            color: var(--color-text-tertiary);
-            margin-bottom: var(--space-0-5);
-        }
-
-        .mini-stat-value {
-            font-size: var(--text-md);
-            font-weight: var(--font-bold);
-        }
-
-        /* All Players Table */
-        .players-table {
-            width: 100%;
-            background: var(--color-surface-elevated);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--color-border);
-        }
-
-        .players-table th,
-        .players-table td {
-            padding: var(--space-3) var(--space-4);
-            text-align: left;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .players-table th {
-            background: var(--color-surface-container);
-            font-size: var(--text-xs);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--color-text-secondary);
-            font-weight: var(--font-semibold);
-        }
-
-        .players-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .players-table tr:hover td {
-            background: var(--color-surface-container);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: var(--space-12);
-            color: var(--color-text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: var(--space-4);
-            opacity: 0.5;
-        }
-
-        /* Back Link */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-            color: var(--color-primary);
-            text-decoration: none;
-            font-weight: var(--font-medium);
-            font-size: var(--text-sm);
-            margin-bottom: var(--space-4);
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Refresh Button */
-        .refresh-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-            padding: var(--space-2) var(--space-3);
-            background: var(--color-surface-container);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-default);
-            color: var(--color-text-secondary);
-            font-size: var(--text-sm);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .refresh-btn:hover {
-            background: var(--color-surface-container-high);
-            color: var(--color-text);
-        }
-
-        /* Last Update */
-        .last-update {
-            font-size: var(--text-xs);
-            color: var(--color-text-tertiary);
-        }
-    </style>
-</head>
-
-<!-- Shared config (must load first) -->
-<script src="config.js?v=1"></script>
-
-<!-- Client-side auth check (backup for cached pages) -->
-<script>
-    (function () {
-        fetch('/api/auth/session', { credentials: 'same-origin' })
-            .then(r => r.json())
-            .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
-            .catch(() => window.location.href = '/login.html');
-    })();
-</script>
+    <!-- Client-side auth check (backup for cached pages) -->
+    <script>
+        (function () {
+            fetch('/api/auth/session', { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
+                .catch(() => window.location.href = '/login.html');
+        })();
+    </script>
 
 <body>
     <div class="coach-dashboard" id="coachDashboard">
@@ -424,10 +129,13 @@
         </table>
     </div>
 
+    <!-- Stats Utils Module (must load before coach logic) -->
+    <script src="stats-utils.js?v=1"></script>
+
     <script>
-        // Coach Dashboard Logic
-        // Use shared config if available
+        // Coach Dashboard Logic - Now uses shared StatsUtils
         const STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
+        const Stats = window.VB.StatsUtils;
         let data = null;
         let refreshInterval = null;
 
@@ -443,8 +151,7 @@
                     headers: { 'Accept': 'application/json' }
                 });
                 if (response.ok) {
-                    const serverData = await response.json();
-                    data = serverData;
+                    data = await response.json();
                     renderDashboard();
                     updateLastUpdate();
                     return;
@@ -472,86 +179,34 @@
                 `Letzte Aktualisierung: ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
         }
 
-        // Calculate average for an element across all players
-        function calcTeamAvg(element) {
-            if (!data || !data.players) return { avg: 0, count: 0 };
-            let total = 0;
-            let count = 0;
-            data.players.forEach(p => {
-                if (p.stats && p.stats[element]) {
-                    p.stats[element].forEach(score => {
-                        total += score;
-                        count++;
-                    });
-                }
-            });
-            return { avg: count > 0 ? (total / count).toFixed(2) : '--', count };
-        }
-
-        // Count specific scores
-        function countScores(scoreValue) {
-            if (!data || !data.players) return 0;
-            let count = 0;
-            const elements = ['aufschlag', 'annahme', 'angriff', 'block', 'feldabwehr', 'freeball'];
-            data.players.forEach(p => {
-                elements.forEach(el => {
-                    if (p.stats && p.stats[el]) {
-                        count += p.stats[el].filter(s => s === scoreValue).length;
-                    }
-                });
-            });
-            return count;
-        }
-
-        // Count aces (score 3 in aufschlag)
-        function countAces() {
-            if (!data || !data.players) return 0;
-            let count = 0;
-            data.players.forEach(p => {
-                if (p.stats && p.stats.aufschlag) {
-                    count += p.stats.aufschlag.filter(s => s === 3).length;
-                }
-            });
-            return count;
-        }
-
-        // Get avg class
-        function getAvgClass(avg) {
-            if (avg === '--') return '';
-            const val = parseFloat(avg);
-            if (val >= 2.0) return 'good';
-            if (val >= 1.0) return 'ok';
-            return 'bad';
-        }
-
-        // Render dashboard
+        // Render dashboard using shared StatsUtils
         function renderDashboard() {
-            if (!data || !data.players) return;
+            if (!data?.players) return;
 
-            // Team stats
-            const attack = calcTeamAvg('angriff');
-            const reception = calcTeamAvg('annahme');
-            const serve = calcTeamAvg('aufschlag');
-            const block = calcTeamAvg('block');
+            // Team stats (using shared module)
+            const attack = Stats.calcTeamAvg(data.players, 'angriff');
+            const reception = Stats.calcTeamAvg(data.players, 'annahme');
+            const serve = Stats.calcTeamAvg(data.players, 'aufschlag');
+            const block = Stats.calcTeamAvg(data.players, 'block');
 
             document.getElementById('statAttack').textContent = attack.avg;
-            document.getElementById('statAttack').className = `stat-value ${getAvgClass(attack.avg)}`;
+            document.getElementById('statAttack').className = `stat-value ${Stats.getAvgClass(attack.avg)}`;
             document.getElementById('statAttackCount').textContent = `${attack.count} Aktionen`;
 
             document.getElementById('statReception').textContent = reception.avg;
-            document.getElementById('statReception').className = `stat-value ${getAvgClass(reception.avg)}`;
+            document.getElementById('statReception').className = `stat-value ${Stats.getAvgClass(reception.avg)}`;
             document.getElementById('statReceptionCount').textContent = `${reception.count} Aktionen`;
 
             document.getElementById('statServe').textContent = serve.avg;
-            document.getElementById('statServe').className = `stat-value ${getAvgClass(serve.avg)}`;
+            document.getElementById('statServe').className = `stat-value ${Stats.getAvgClass(serve.avg)}`;
             document.getElementById('statServeCount').textContent = `${serve.count} Aktionen`;
 
             document.getElementById('statBlock').textContent = block.avg;
-            document.getElementById('statBlock').className = `stat-value ${getAvgClass(block.avg)}`;
+            document.getElementById('statBlock').className = `stat-value ${Stats.getAvgClass(block.avg)}`;
             document.getElementById('statBlockCount').textContent = `${block.count} Aktionen`;
 
-            document.getElementById('statAces').textContent = countAces();
-            document.getElementById('statErrors').textContent = countScores(0);
+            document.getElementById('statAces').textContent = Stats.countAces(data.players);
+            document.getElementById('statErrors').textContent = Stats.countErrors(data.players);
 
             // Starting Six
             const activePlayers = data.players.filter(p => p.active);
@@ -559,9 +214,9 @@
 
             if (activePlayers.length > 0) {
                 document.getElementById('startingSixGrid').innerHTML = activePlayers.map(p => {
-                    const attackAvg = calcPlayerAvg(p, 'angriff');
-                    const receptionAvg = calcPlayerAvg(p, 'annahme');
-                    const serveAvg = calcPlayerAvg(p, 'aufschlag');
+                    const attackAvg = Stats.calcPlayerAvg(p, 'angriff');
+                    const receptionAvg = Stats.calcPlayerAvg(p, 'annahme');
+                    const serveAvg = Stats.calcPlayerAvg(p, 'aufschlag');
                     return `
                         <div class="player-card">
                             <div class="player-card-header">
@@ -576,15 +231,15 @@
                             <div class="player-stats-mini">
                                 <div class="mini-stat">
                                     <div class="mini-stat-label">Angriff</div>
-                                    <div class="mini-stat-value ${getAvgClass(attackAvg)}">${attackAvg}</div>
+                                    <div class="mini-stat-value ${Stats.getAvgClass(attackAvg)}">${attackAvg}</div>
                                 </div>
                                 <div class="mini-stat">
                                     <div class="mini-stat-label">Annahme</div>
-                                    <div class="mini-stat-value ${getAvgClass(receptionAvg)}">${receptionAvg}</div>
+                                    <div class="mini-stat-value ${Stats.getAvgClass(receptionAvg)}">${receptionAvg}</div>
                                 </div>
                                 <div class="mini-stat">
                                     <div class="mini-stat-label">Aufschlag</div>
-                                    <div class="mini-stat-value ${getAvgClass(serveAvg)}">${serveAvg}</div>
+                                    <div class="mini-stat-value ${Stats.getAvgClass(serveAvg)}">${serveAvg}</div>
                                 </div>
                             </div>
                         </div>
@@ -606,36 +261,21 @@
             document.getElementById('allPlayersCount').textContent = `${data.players.length} Spieler`;
             if (data.players.length > 0) {
                 document.getElementById('playersTableBody').innerHTML = data.players.map(p => {
-                    const totalActions = getTotalActions(p);
+                    const totalActions = Stats.getTotalActions(p);
                     return `
                         <tr>
                             <td><strong>${p.number || '-'}</strong></td>
                             <td>${p.name}${p.active ? ' ⚡' : ''}</td>
                             <td>${p.position || '-'}</td>
-                            <td class="${getAvgClass(calcPlayerAvg(p, 'aufschlag'))}">${calcPlayerAvg(p, 'aufschlag')}</td>
-                            <td class="${getAvgClass(calcPlayerAvg(p, 'annahme'))}">${calcPlayerAvg(p, 'annahme')}</td>
-                            <td class="${getAvgClass(calcPlayerAvg(p, 'angriff'))}">${calcPlayerAvg(p, 'angriff')}</td>
-                            <td class="${getAvgClass(calcPlayerAvg(p, 'block'))}">${calcPlayerAvg(p, 'block')}</td>
+                            <td class="${Stats.getAvgClass(Stats.calcPlayerAvg(p, 'aufschlag'))}">${Stats.calcPlayerAvg(p, 'aufschlag')}</td>
+                            <td class="${Stats.getAvgClass(Stats.calcPlayerAvg(p, 'annahme'))}">${Stats.calcPlayerAvg(p, 'annahme')}</td>
+                            <td class="${Stats.getAvgClass(Stats.calcPlayerAvg(p, 'angriff'))}">${Stats.calcPlayerAvg(p, 'angriff')}</td>
+                            <td class="${Stats.getAvgClass(Stats.calcPlayerAvg(p, 'block'))}">${Stats.calcPlayerAvg(p, 'block')}</td>
                             <td>${totalActions}</td>
                         </tr>
                     `;
                 }).join('');
             }
-        }
-
-        function calcPlayerAvg(player, element) {
-            if (!player.stats || !player.stats[element] || player.stats[element].length === 0) {
-                return '--';
-            }
-            const scores = player.stats[element];
-            const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-            return avg.toFixed(2);
-        }
-
-        function getTotalActions(player) {
-            if (!player.stats) return 0;
-            const elements = ['aufschlag', 'annahme', 'angriff', 'block', 'feldabwehr', 'freeball'];
-            return elements.reduce((sum, el) => sum + (player.stats[el]?.length || 0), 0);
         }
 
         // Auto-refresh every 5 seconds

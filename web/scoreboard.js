@@ -81,10 +81,12 @@ class Scoreboard {
 
     async syncToServer() {
         try {
-            // If scout is available, update its scoreboard field
+            // If scout is available, update its scoreboard reference (for unified API sync)
+            // NOTE: We do NOT call scoutEngine.saveData() here to avoid duplicate saves.
+            // The scoreboard has its own localStorage key, and ScoutEngine will include
+            // scoreboard data in its next sync cycle automatically.
             if (window.scoutEngine) {
                 window.scoutEngine.data.scoreboard = this.data;
-                window.scoutEngine.saveData();
             }
         } catch (e) {
             console.warn('[Scoreboard] Sync error', e);
