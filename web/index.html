@@ -719,6 +719,14 @@
                             </svg>
                             Export
                         </button>
+                        <button class="scout-btn-action scout-btn-restore" id="scoutRestorePlayer"
+                            title="Entfernte Spieler wiederherstellen">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                            Wiederherstellen
+                        </button>
                     </div>
                 </div>
 
@@ -775,6 +783,30 @@
                     <span class="scout-legend-item"><kbd>ESC</kbd> Reset</span>
                 </div>
 
+                <!-- Team Summary Cards (moved to top for visibility) -->
+                <div class="scout-summary-grid" id="scoutSummaryGrid">
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Kill Ratio</span>
+                        <span class="scout-summary-value" id="scoutKillRatio">--%</span>
+                        <span class="scout-summary-sub">Angriff Punkte / Gesamt</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Annahme %</span>
+                        <span class="scout-summary-value" id="scoutReceptionPct">--%</span>
+                        <span class="scout-summary-sub">Perfekte Annahmen / Gesamt</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Asse</span>
+                        <span class="scout-summary-value" id="scoutAces">0</span>
+                        <span class="scout-summary-sub">Direkte Aufschlag-Punkte</span>
+                    </div>
+                    <div class="scout-summary-card">
+                        <span class="scout-summary-label">Unforced Errors</span>
+                        <span class="scout-summary-value" id="scoutUE">0</span>
+                        <span class="scout-summary-sub">Eigene Fehler (0-Wertungen)</span>
+                    </div>
+                </div>
+
                 <!-- Scout Table -->
                 <div class="scout-table-container">
                     <table class="scout-table" id="scoutTable">
@@ -826,30 +858,6 @@
                         <h3>Keine Spieler</h3>
                         <p>Füge Spieler hinzu um mit dem Scouting zu beginnen.</p>
                         <button class="btn-primary-sm" id="scoutAddPlayerEmpty">+ Spieler hinzufügen</button>
-                    </div>
-                </div>
-
-                <!-- Team Summary Cards -->
-                <div class="scout-summary-grid" id="scoutSummaryGrid">
-                    <div class="scout-summary-card">
-                        <span class="scout-summary-label">Kill Ratio</span>
-                        <span class="scout-summary-value" id="scoutKillRatio">--%</span>
-                        <span class="scout-summary-sub">Angriff Punkte / Gesamt</span>
-                    </div>
-                    <div class="scout-summary-card">
-                        <span class="scout-summary-label">Annahme %</span>
-                        <span class="scout-summary-value" id="scoutReceptionPct">--%</span>
-                        <span class="scout-summary-sub">Perfekte Annahmen / Gesamt</span>
-                    </div>
-                    <div class="scout-summary-card">
-                        <span class="scout-summary-label">Asse</span>
-                        <span class="scout-summary-value" id="scoutAces">0</span>
-                        <span class="scout-summary-sub">Direkte Aufschlag-Punkte</span>
-                    </div>
-                    <div class="scout-summary-card">
-                        <span class="scout-summary-label">Unforced Errors</span>
-                        <span class="scout-summary-value" id="scoutUE">0</span>
-                        <span class="scout-summary-sub">Eigene Fehler (0-Wertungen)</span>
                     </div>
                 </div>
             </section>
@@ -1259,6 +1267,7 @@
     <script src="matchday.js?v=1"></script>
     <script src="app.js?v=3"></script>
     <script type="module" src="js/scout-main.js"></script>
+    <script src="scout.legacy.js?v=1"></script>
     <script src="router.js?v=1"></script>
 
     <!-- Theme Toggle Script -->

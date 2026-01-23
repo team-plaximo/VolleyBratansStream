@@ -27,6 +27,11 @@ export class ScoutState {
         return ['?', 'Z', 'D', 'AA', 'MB', 'L'];
     }
 
+    // Binary elements: only 3 (perfect) or 0 (error), no 2/1 scores
+    static get BINARY_ELEMENTS() {
+        return ['block', 'feldabwehr', 'freeball'];
+    }
+
     /**
      * Create a new player object
      */

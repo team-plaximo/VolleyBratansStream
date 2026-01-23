@@ -30,6 +30,7 @@ class ScoutEngine {
             selectedElement: null       // 'aufschlag', 'annahme', etc.
         };
         this.undoStack = []; // [{playerId, element, score}]
+        this.removedPlayers = []; // Stack of recently removed players for restoration (max 10)
         this.ELEMENT_SHORTCUTS = {
             'a': 'aufschlag',
             's': 'annahme',     // S = Serve-Receive
@@ -54,6 +55,9 @@ class ScoutEngine {
             'L': 'Libero'
         };
         this.POSITION_KEYS = ['Z', 'D', 'AA', 'MB', 'L'];
+
+        // Binary elements: only 3 (perfect) or 0 (error), no 2/1 scores
+        this.BINARY_ELEMENTS = ['block', 'feldabwehr', 'freeball'];
 
         // Server sync configuration - use shared getApiBase if available
         this.API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : this._getApiBaseFallback();
@@ -323,6 +327,7 @@ class ScoutEngine {
         document.getElementById('scoutNewMatch')?.addEventListener('click', () => this.newMatch());
         document.getElementById('scoutHelp')?.addEventListener('click', () => this.showHelpModal());
         document.getElementById('scoutExport')?.addEventListener('click', () => this.exportData());
+        document.getElementById('scoutRestorePlayer')?.addEventListener('click', () => this.showRestorePlayerModal());
 
         // Initial render
         this.render();
@@ -391,9 +396,165 @@ class ScoutEngine {
     }
 
     removePlayer(playerId) {
+        // Find the player to remove
+        const player = this.data.players.find(p => p.id === playerId);
+        if (player) {
+            // Save to removed players stack for potential restoration
+            this.removedPlayers.push({
+                player: JSON.parse(JSON.stringify(player)), // Deep copy
+                removedAt: Date.now()
+            });
+            // Keep max 10 removed players
+            if (this.removedPlayers.length > 10) {
+                this.removedPlayers.shift();
+            }
+        }
+
         this.data.players = this.data.players.filter(p => p.id !== playerId);
         this.saveData();
         this.render();
+    }
+
+    /**
+     * Restore the most recently removed player
+     */
+    restorePlayer(index = null) {
+        if (this.removedPlayers.length === 0) {
+            console.log('[Scout] No players to restore');
+            return null;
+        }
+
+        // If index is provided, restore that specific player, otherwise restore the last one
+        let entry;
+        if (index !== null && index >= 0 && index < this.removedPlayers.length) {
+            entry = this.removedPlayers.splice(index, 1)[0];
+        } else {
+            entry = this.removedPlayers.pop();
+        }
+
+        if (entry && entry.player) {
+            // Generate a new ID to avoid conflicts
+            entry.player.id = Date.now() + Math.random();
+            this.data.players.push(entry.player);
+            this.saveData();
+            this.render();
+            console.log(`[Scout] Restored player: ${entry.player.name}`);
+            return entry.player;
+        }
+        return null;
+    }
+
+    /**
+     * Show modal with recently removed players for restoration
+     */
+    showRestorePlayerModal() {
+        if (this.removedPlayers.length === 0) {
+            alert('Keine entfernten Spieler zum Wiederherstellen vorhanden.');
+            return;
+        }
+
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('scoutRestoreModal');
+        if (!modal) {
+            modal = this.createRestorePlayerModal();
+            document.body.appendChild(modal);
+        }
+
+        // Update modal content with removed players list
+        const listEl = modal.querySelector('.scout-restore-list');
+        listEl.innerHTML = this.removedPlayers.map((entry, index) => {
+            const player = entry.player;
+            const timeAgo = this.formatTimeAgo(entry.removedAt);
+            const statsCount = Object.values(player.stats || {}).reduce((sum, arr) => sum + arr.length, 0);
+
+            return `
+                <div class="scout-restore-item" data-index="${index}">
+                    <div class="scout-restore-info">
+                        ${player.number ? `<span class="scout-player-number">#${player.number}</span>` : ''}
+                        <span class="scout-restore-name">${this.escapeHtml(player.name)}</span>
+                        <span class="scout-restore-meta">${statsCount} Aktionen • ${timeAgo}</span>
+                    </div>
+                    <button class="btn-primary btn-sm scout-restore-btn" data-restore-index="${index}">
+                        Wiederherstellen
+                    </button>
+                </div>
+            `;
+        }).reverse().join(''); // Show newest first
+
+        // Attach restore button listeners
+        listEl.querySelectorAll('.scout-restore-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.currentTarget.dataset.restoreIndex);
+                this.restorePlayer(idx);
+
+                // Refresh modal or close if empty
+                if (this.removedPlayers.length === 0) {
+                    modal.classList.add('hidden');
+                } else {
+                    this.showRestorePlayerModal(); // Refresh
+                }
+            });
+        });
+
+        modal.classList.remove('hidden');
+    }
+
+    /**
+     * Create the restore player modal element
+     */
+    createRestorePlayerModal() {
+        const modal = document.createElement('div');
+        modal.id = 'scoutRestoreModal';
+        modal.className = 'modal-overlay hidden';
+        modal.innerHTML = `
+            <div class="modal scout-restore-modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Spieler wiederherstellen
+                    </h3>
+                    <button class="modal-close" id="scoutRestoreClose">
+                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="scout-restore-list"></div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="scoutRestoreClear">Alle löschen</button>
+                    <button class="btn-secondary" id="scoutRestoreDone">Schließen</button>
+                </div>
+            </div>
+        `;
+
+        // Close listeners
+        modal.querySelector('#scoutRestoreClose').addEventListener('click', () => modal.classList.add('hidden'));
+        modal.querySelector('#scoutRestoreDone').addEventListener('click', () => modal.classList.add('hidden'));
+        modal.querySelector('#scoutRestoreClear').addEventListener('click', () => {
+            if (confirm('Alle entfernten Spieler endgültig löschen?')) {
+                this.removedPlayers = [];
+                modal.classList.add('hidden');
+            }
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+
+        return modal;
+    }
+
+    /**
+     * Format time ago for display
+     */
+    formatTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'gerade eben';
+        if (seconds < 3600) return `vor ${Math.floor(seconds / 60)} min`;
+        if (seconds < 86400) return `vor ${Math.floor(seconds / 3600)} Std`;
+        return `vor ${Math.floor(seconds / 86400)} Tagen`;
     }
 
     addScore(playerId, element, score) {
@@ -483,14 +644,21 @@ class ScoutEngine {
             const avgClass = this.getAverageClass(avg);
             const count = scores.length;
 
+            // Binary elements (Block, Feldabwehr, Freeball) get only 2 buttons (3, 0)
+            const isBinary = this.BINARY_ELEMENTS.includes(el);
+            const scoreButtons = isBinary
+                ? `<button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="3">3</button>
+                   <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="0">0</button>`
+                : `<button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="3">3</button>
+                   <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="2">2</button>
+                   <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="1">1</button>
+                   <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="0">0</button>`;
+
             return `
                 <td>
                     <div class="scout-cell">
-                        <div class="scout-cell-buttons">
-                            <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="3">3</button>
-                            <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="2">2</button>
-                            <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="1">1</button>
-                            <button class="scout-score-btn" data-player="${player.id}" data-element="${el}" data-score="0">0</button>
+                        <div class="scout-cell-buttons${isBinary ? ' scout-binary' : ''}">
+                            ${scoreButtons}
                         </div>
                         <div class="scout-cell-stats" data-player="${player.id}" data-element="${el}" title="Klicken für Historie">
                             <span class="scout-cell-avg ${avgClass}">${avgDisplay}</span>

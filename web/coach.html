@@ -55,7 +55,7 @@
         </header>
 
         <!-- Team Stats Overview -->
-        <div class="stats-grid" id="teamStats">
+        <div class="stats-grid coach-stats-grid-6" id="teamStats">
             <div class="stat-card">
                 <div class="stat-label">Angriff Ø</div>
                 <div class="stat-value" id="statAttack">--</div>
@@ -86,6 +86,50 @@
                 <div class="stat-value bad" id="statErrors">0</div>
                 <div class="stat-trend">Alle Elemente</div>
             </div>
+        </div>
+
+        <!-- Coach Insights: Top Performers & Alerts -->
+        <div class="coach-insights-grid">
+            <div class="coach-insights-panel">
+                <h3 class="coach-panel-title">🌟 Top Performer</h3>
+                <div class="coach-highlights" id="topPerformers">
+                    <div class="coach-highlight-card empty">
+                        <span class="highlight-text">Lade Daten...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="coach-insights-panel alerts">
+                <h3 class="coach-panel-title">⚠️ Achtung</h3>
+                <div class="coach-alerts-list" id="coachAlerts">
+                    <div class="coach-alert-card">
+                        <span class="alert-text">Lade Daten...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Performance Matrix -->
+        <h2 class="section-title">
+            Spieler-Matrix
+            <span class="section-badge">Live-Vergleich</span>
+        </h2>
+        <div class="coach-matrix-wrapper">
+            <table class="coach-matrix-table" id="coachMatrix">
+                <thead>
+                    <tr>
+                        <th class="player-col">Spieler</th>
+                        <th>🏐 Aufschlag</th>
+                        <th>🎯 Annahme</th>
+                        <th>⚔️ Angriff</th>
+                        <th>🧱 Block</th>
+                    </tr>
+                </thead>
+                <tbody id="coachMatrixBody">
+                    <tr>
+                        <td colspan="5" class="coach-empty-state">Keine Spieler vorhanden</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Starting Six -->
@@ -131,11 +175,14 @@
 
     <!-- Stats Utils Module (must load before coach logic) -->
     <script src="stats-utils.js?v=1"></script>
+    <!-- Coach Charts Module -->
+    <script src="js/coach-charts.js?v=1"></script>
 
     <script>
-        // Coach Dashboard Logic - Now uses shared StatsUtils
+        // Coach Dashboard Logic - Now uses shared StatsUtils + CoachCharts
         const STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
         const Stats = window.VB.StatsUtils;
+        const Charts = window.VB.CoachCharts;
         let data = null;
         let refreshInterval = null;
 
@@ -179,7 +226,7 @@
                 `Letzte Aktualisierung: ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
         }
 
-        // Render dashboard using shared StatsUtils
+        // Render dashboard using shared StatsUtils + CoachCharts
         function renderDashboard() {
             if (!data?.players) return;
 
@@ -207,6 +254,16 @@
 
             document.getElementById('statAces').textContent = Stats.countAces(data.players);
             document.getElementById('statErrors').textContent = Stats.countErrors(data.players);
+
+            // === NEW: Coach Insights (Top Performers + Alerts) ===
+            const topPerformers = Charts.findTopPerformers(data.players);
+            document.getElementById('topPerformers').innerHTML = Charts.renderTopPerformers(topPerformers);
+
+            const alerts = Charts.findAlerts(data.players);
+            document.getElementById('coachAlerts').innerHTML = Charts.renderAlerts(alerts);
+
+            // === NEW: Player Matrix with Mini-Bars ===
+            document.getElementById('coachMatrixBody').innerHTML = Charts.renderPlayerMatrix(data.players);
 
             // Starting Six
             const activePlayers = data.players.filter(p => p.active);

@@ -419,9 +419,8 @@ body {
 .main-content {
     flex: 1;
     padding: var(--space-6) var(--space-4);
-    max-width: 1200px;
-    margin: 0 auto;
     width: 100%;
+    max-width: none;
 }
 
 /* Page Header */
@@ -2451,6 +2450,189 @@ a svg,
     flex-shrink: 0;
 }
 
+/* Keyboard Legend (same styling as scout-legend but with extra spacing) */
+.scout-keyboard-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+/* Scout Player Row Components */
+.scout-td-player {
+    text-align: left !important;
+    padding-left: var(--space-md) !important;
+    font-weight: 600;
+    color: var(--text-main);
+    min-width: 180px;
+}
+
+.scout-player-row-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.scout-player-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex: 1;
+}
+
+.scout-drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    user-select: none;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+}
+
+.scout-row:hover .scout-drag-handle {
+    opacity: 1;
+}
+
+.scout-drag-handle:active {
+    cursor: grabbing;
+}
+
+.scout-key-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: var(--bg-element);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.scout-active-toggle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.scout-active-toggle.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.scout-starting-six {
+    background: rgba(20, 184, 166, 0.05);
+}
+
+.scout-libero {
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.scout-position-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--bg-element);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.scout-position-badge:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Starting Lineup Separator */
+.scout-separator-row td {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.scout-separator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
+}
+
+.scout-separator-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg,
+            var(--border) 0%,
+            var(--text-muted) 50%,
+            var(--border) 100%);
+    opacity: 0.5;
+}
+
+.scout-separator-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 4px 12px;
+    background: var(--bg-element);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+}
+
+/* On-Court vs Bench Styling */
+.scout-row.scout-on-court {
+    background: rgba(20, 184, 166, 0.06);
+    border-left: 3px solid var(--primary);
+}
+
+.scout-row.scout-on-court:hover {
+    background: rgba(20, 184, 166, 0.10);
+}
+
+.scout-row.scout-on-bench {
+    opacity: 0.7;
+    background: var(--bg-surface);
+}
+
+.scout-row.scout-on-bench:hover {
+    opacity: 1;
+    background: var(--bg-element);
+}
+
+/* Libero special highlight (amber) */
+.scout-row.scout-libero {
+    border-left-color: #f59e0b;
+}
+
+.scout-row.scout-on-court.scout-libero {
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.scout-row.scout-on-court.scout-libero:hover {
+    background: rgba(245, 158, 11, 0.12);
+}
+
+
 /* Score Badges */
 .scout-score-badge {
     display: inline-flex;
@@ -2572,14 +2754,54 @@ a svg,
     border-top: 2px solid var(--border);
 }
 
-/* Scout Cell with Score Input */
+/* Scout Cell with Score Input - Horizontal Layout */
 .scout-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+}
+
+/* Stats container (avg + count grouped) */
+.scout-cell-stats-inline {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    min-width: 36px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s ease;
 }
 
+.scout-cell-stats-inline:hover {
+    background: var(--bg-surface-hover);
+}
+
+.scout-avg {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.scout-avg.good {
+    color: var(--success);
+}
+
+.scout-avg.average {
+    color: var(--warning);
+}
+
+.scout-avg.poor {
+    color: var(--error);
+}
+
+.scout-count {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+/* Legacy class support */
 .scout-cell-avg {
     font-weight: 700;
     font-size: 0.95rem;
@@ -2602,8 +2824,11 @@ a svg,
     color: var(--text-muted);
 }
 
-.scout-cell-buttons {
+/* Score buttons - always horizontal */
+.scout-cell-buttons,
+.scout-score-btns {
     display: flex;
+    flex-direction: row;
     gap: 2px;
 }
 
@@ -2628,6 +2853,13 @@ a svg,
 
 .scout-score-btn:active {
     transform: scale(0.95);
+}
+
+/* Binary elements (Block, Feldabwehr, Freeball) - wider buttons */
+.scout-cell-buttons.scout-binary .scout-score-btn,
+.scout-score-btns.scout-binary .scout-score-btn {
+    flex: 1;
+    min-width: 36px;
 }
 
 /* Player Row Actions */
@@ -2691,7 +2923,8 @@ a svg,
 .scout-summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--space-md);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .scout-summary-card {
@@ -2788,6 +3021,11 @@ a svg,
 
     .scout-th-label {
         font-size: 0.7rem;
+    }
+
+    /* Mobile: stack Scout cells vertically */
+    .scout-cell {
+        flex-direction: column;
     }
 
     .scout-score-btn {
@@ -3045,8 +3283,8 @@ a svg,
    ======================================== */
 .main-content {
     padding: var(--space-lg);
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
 }
 
 .page {
@@ -4745,6 +4983,314 @@ tr.scout-libero {
 }
 
 /* ========================================
+   Coach Dashboard - iPad Enhancements
+   Tablet-optimized visuals for live coaching
+   ======================================== */
+
+/* 6-Column Stats Grid for Coach */
+.coach-stats-grid-6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+    .coach-stats-grid-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .coach-stats-grid-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Insights Grid (Top Performers + Alerts) */
+.coach-insights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+@media (max-width: 768px) {
+    .coach-insights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.coach-insights-panel {
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.coach-insights-panel.alerts {
+    border-left: 3px solid hsl(45 93% 47%);
+}
+
+.coach-panel-title {
+    font-size: var(--text-md);
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+    margin: 0 0 var(--space-3) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* Highlight Cards (Top Performers) */
+.coach-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.coach-highlight-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-surface-container);
+    border-radius: var(--radius-default);
+    min-height: 48px;
+    /* Touch target */
+}
+
+.coach-highlight-card.empty {
+    opacity: 0.6;
+    justify-content: center;
+}
+
+.highlight-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.highlight-player {
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+}
+
+.highlight-stat {
+    margin-left: auto;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    background: var(--color-surface-elevated);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+}
+
+.highlight-text {
+    color: var(--color-text-secondary);
+}
+
+/* Alert Cards */
+.coach-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.coach-alert-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-default);
+    min-height: 48px;
+    /* Touch target */
+    background: var(--color-surface-container);
+}
+
+.coach-alert-card.critical {
+    background: hsl(0 50% 15%);
+    border: 1px solid hsl(0 70% 40%);
+}
+
+.coach-alert-card.warning {
+    background: hsl(45 50% 15%);
+    border: 1px solid hsl(45 70% 40%);
+}
+
+.coach-alert-card.success {
+    background: hsl(142 50% 15%);
+    border: 1px solid hsl(142 70% 35%);
+}
+
+.alert-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.alert-text {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+/* Player Matrix Table */
+.coach-matrix-wrapper {
+    overflow-x: auto;
+    margin-bottom: var(--space-6);
+}
+
+.coach-matrix-table {
+    width: 100%;
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-lg);
+    border-collapse: collapse;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.coach-matrix-table th,
+.coach-matrix-table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.coach-matrix-table th {
+    background: var(--color-surface-container);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.coach-matrix-table th.player-col {
+    min-width: 140px;
+}
+
+.coach-matrix-table tr:last-child td {
+    border-bottom: none;
+}
+
+.coach-matrix-table tr:hover td {
+    background: var(--color-surface-container);
+}
+
+/* Matrix Player Cell */
+.coach-matrix-player {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.coach-matrix-player .player-number {
+    background: var(--color-primary);
+    color: white;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-bold);
+    font-size: var(--text-xs);
+    min-width: 32px;
+    text-align: center;
+}
+
+.coach-matrix-player .player-name {
+    font-weight: var(--font-medium);
+    color: var(--color-text);
+}
+
+.coach-matrix-player .active-badge {
+    font-size: 0.75rem;
+}
+
+/* Matrix Cell with Mini-Bar */
+.coach-matrix-cell {
+    min-width: 120px;
+}
+
+/* Mini Performance Bar */
+.coach-mini-bar {
+    display: flex;
+    height: 8px;
+    background: var(--color-surface-container-high);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--space-1);
+}
+
+.coach-mini-bar-fill {
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.coach-mini-bar-fill.good {
+    background: hsl(142 70% 45%);
+}
+
+.coach-mini-bar-fill.ok {
+    background: hsl(45 90% 50%);
+}
+
+.coach-mini-bar-fill.bad {
+    background: hsl(0 70% 50%);
+}
+
+.coach-bar-value {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+}
+
+.coach-bar-value.good {
+    color: hsl(142 70% 45%);
+}
+
+.coach-bar-value.ok {
+    color: hsl(45 90% 50%);
+}
+
+.coach-bar-value.bad {
+    color: hsl(0 70% 50%);
+}
+
+/* iPad Media Queries (768px - 1366px) */
+@media (min-width: 768px) and (max-width: 1366px) {
+    .coach-dashboard {
+        padding: var(--space-4);
+    }
+
+    /* Ensure touch targets are at least 44px */
+    .coach-highlight-card,
+    .coach-alert-card {
+        min-height: 48px;
+        padding: var(--space-4);
+    }
+
+    .coach-matrix-table td,
+    .coach-matrix-table th {
+        padding: var(--space-4);
+    }
+
+    /* Larger stat values for distance viewing */
+    .coach-stats-grid-6 .stat-value {
+        font-size: var(--text-2xl);
+    }
+
+    .coach-stats-grid-6 .stat-label {
+        font-size: var(--text-sm);
+    }
+}
+
+/* Large tablet landscape (e.g. iPad Pro) */
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .coach-insights-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .coach-stats-grid-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ========================================
    Help Page
    Migrated from help.html inline styles
    ======================================== */
@@ -4999,6 +5545,7 @@ tr.scout-libero {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--space-6);
+    width: 100%;
 }
 
 .matchday-card {
@@ -5453,8 +6000,11 @@ tr.scout-libero {
     color: var(--text-main);
 }
 
+/* Toggle button remains visible in collapsed state, centered */
 .sidebar.collapsed .sidebar-toggle {
-    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .sidebar-nav {
@@ -5548,9 +6098,71 @@ tr.scout-libero {
     display: none;
 }
 
+/* ========================================
+   SIDEBAR FOOTER - Moneyball Clean Design
+   ======================================== */
 .sidebar-footer {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+/* Constrain ALL icons inside footer to 20px max */
+.sidebar-footer .sidebar-item-icon,
+.sidebar-footer svg {
+    width: 20px;
+    height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    flex-shrink: 0;
+}
+
+/* Connection Status in Footer */
+.sidebar-footer .nav-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-hover);
+    margin-bottom: var(--space-xs);
+}
+
+.sidebar-footer .nav-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sidebar-footer .nav-status .status-dot.status-connected {
+    background: var(--color-success, hsl(142, 71%, 45%));
+    box-shadow: 0 0 6px var(--color-success, hsl(142, 71%, 45%));
+}
+
+.sidebar-footer .nav-status .status-dot.status-disconnected {
+    background: var(--color-error, hsl(0, 84%, 60%));
+}
+
+/* Hide nav-status text when sidebar is collapsed */
+.sidebar.collapsed .sidebar-footer .nav-status .nav-status-text {
+    display: none;
+}
+
+/* Center status indicator when collapsed */
+.sidebar.collapsed .sidebar-footer .nav-status {
+    justify-content: center;
+    padding: var(--space-xs);
+}
+
+/* Footer items alignment when collapsed */
+.sidebar.collapsed .sidebar-footer {
+    padding: var(--space-sm);
+    align-items: center;
 }
 
 .sidebar-keyboard-hint {
@@ -5577,11 +6189,15 @@ tr.scout-libero {
 
 .has-sidebar .main-content {
     margin-left: 240px;
-    transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
+    width: calc(100% - 240px);
+    max-width: none;
+    transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1),
+        width 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .has-sidebar.sidebar-collapsed .main-content {
     margin-left: 64px;
+    width: calc(100% - 64px);
 }
 
 /* Mobile: Hide sidebar by default */
@@ -5644,4 +6260,85 @@ tr.scout-libero {
     .sidebar-backdrop.visible {
         display: block;
     }
+}
+
+/* ========================================
+   SCOUT RESTORE PLAYER MODAL
+   ======================================== */
+
+/* Restore Button Styling */
+.scout-btn-restore {
+    color: hsl(var(--teal-500)) !important;
+    border-color: hsl(var(--teal-500) / 0.3) !important;
+}
+
+.scout-btn-restore:hover {
+    background: hsl(var(--teal-500) / 0.1) !important;
+    border-color: hsl(var(--teal-500)) !important;
+}
+
+/* Restore Modal */
+.scout-restore-modal {
+    width: 100%;
+    max-width: 480px;
+}
+
+.scout-restore-modal .modal-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.scout-restore-modal .modal-title svg {
+    color: hsl(var(--teal-500));
+}
+
+.scout-restore-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: var(--space-2) 0;
+}
+
+.scout-restore-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.15s ease;
+}
+
+.scout-restore-item:last-child {
+    border-bottom: none;
+}
+
+.scout-restore-item:hover {
+    background: var(--color-surface-container);
+}
+
+.scout-restore-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+}
+
+.scout-restore-name {
+    font-weight: 500;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scout-restore-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.scout-restore-btn {
+    flex-shrink: 0;
+    margin-left: var(--space-3);
 }

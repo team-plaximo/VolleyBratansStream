@@ -48,6 +48,9 @@
             // Update active state based on current page/hash
             this.updateActiveItem();
             window.addEventListener('hashchange', () => this.updateActiveItem());
+
+            // Set correct icon based on initial collapsed state
+            this.updateToggleIcon();
         }
 
         toggle() {
@@ -55,6 +58,21 @@
             this.sidebar?.classList.toggle('collapsed', this.isCollapsed);
             document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
             localStorage.setItem(STORAGE_KEY, this.isCollapsed);
+            this.updateToggleIcon();
+        }
+
+        updateToggleIcon() {
+            // Update toggle icon: left-arrow when expanded (to collapse), right-arrow when collapsed (to expand)
+            const icon = this.toggleBtn?.querySelector('svg');
+            if (icon) {
+                if (this.isCollapsed) {
+                    // Chevron right (expand sidebar)
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>';
+                } else {
+                    // Chevron left (collapse sidebar)
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>';
+                }
+            }
         }
 
         toggleMobile() {

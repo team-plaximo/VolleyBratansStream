@@ -46,6 +46,7 @@ class ScoutEngineModular {
         };
 
         this.initialized = false;
+        this.tableListenersInitialized = false; // Guard for event delegation
     }
 
     /**
@@ -59,6 +60,9 @@ class ScoutEngineModular {
 
         // Initialize keyboard shortcuts
         this.keyboard.init();
+
+        // Bind header action buttons
+        this.bindHeaderButtons();
 
         // Try to load from server first, fallback to local
         const loaded = await this.loadFromServer();
@@ -241,11 +245,18 @@ class ScoutEngineModular {
             this.elements.emptyState.classList.add('hidden');
         }
 
-        // Build player rows
+        // Build player rows with starting lineup separator
+        const STARTING_LINEUP_SIZE = 7; // 6 players + 1 libero
         let html = '';
+
         this.state.players.forEach((player, index) => {
-            html += this.renderPlayerRow(player, index);
+            // Add separator row after starting lineup
+            if (index === STARTING_LINEUP_SIZE) {
+                html += this.renderSeparatorRow();
+            }
+            html += this.renderPlayerRow(player, index, index < STARTING_LINEUP_SIZE);
         });
+
         this.elements.tableBody.innerHTML = html;
 
         // Render team totals
@@ -253,14 +264,39 @@ class ScoutEngineModular {
             this.elements.tableFoot.innerHTML = this.renderTeamRow();
         }
 
-        // Attach event listeners
-        this.attachRowListeners();
+        // Initialize event listeners ONCE using event delegation
+        // This should NOT be called on every render!
+        if (!this.tableListenersInitialized) {
+            this.attachRowListeners();
+            this.tableListenersInitialized = true;
+        }
+    }
+
+    /**
+     * Render separator row between starting lineup and bench
+     */
+    renderSeparatorRow() {
+        const colSpan = ScoutState.ELEMENTS.length + 2; // player + elements + actions
+        return `
+            <tr class="scout-separator-row">
+                <td colspan="${colSpan}">
+                    <div class="scout-separator">
+                        <span class="scout-separator-line"></span>
+                        <span class="scout-separator-label">Bank</span>
+                        <span class="scout-separator-line"></span>
+                    </div>
+                </td>
+            </tr>
+        `;
     }
 
     /**
      * Render a single player row
+     * @param {Object} player - Player object
+     * @param {number} index - Player index in list
+     * @param {boolean} isOnCourt - Whether player is in starting lineup (position <= 7)
      */
-    renderPlayerRow(player, index) {
+    renderPlayerRow(player, index, isOnCourt = false) {
         const elements = ScoutState.ELEMENTS;
         const posClass = player.position ? `pos-${player.position}` : '';
 
@@ -270,42 +306,66 @@ class ScoutEngineModular {
             const avg = ScoutStats.calculateAverage(scores);
             const avgClass = ScoutStats.getAverageClass(avg);
 
+            // Binary elements (Block, Feldabwehr, Freeball) get only 2 buttons (3, 0)
+            const isBinary = ScoutState.BINARY_ELEMENTS.includes(el);
+            const scoreButtons = isBinary
+                ? `<button class="scout-score-btn scout-score-3" data-score="3">3</button>
+                   <button class="scout-score-btn scout-score-0" data-score="0">0</button>`
+                : `<button class="scout-score-btn scout-score-0" data-score="0">0</button>
+                   <button class="scout-score-btn scout-score-1" data-score="1">1</button>
+                   <button class="scout-score-btn scout-score-2" data-score="2">2</button>
+                   <button class="scout-score-btn scout-score-3" data-score="3">3</button>`;
+
             cellsHtml += `
-                <td class="scout-cell" data-element="${el}" data-player="${player.id}">
-                    <span class="scout-avg ${avgClass}" data-action="history">${avg}</span>
-                    <span class="scout-count">${scores.length}</span>
-                    <div class="scout-score-btns">
-                        <button class="scout-score-btn scout-score-0" data-score="0">0</button>
-                        <button class="scout-score-btn scout-score-1" data-score="1">1</button>
-                        <button class="scout-score-btn scout-score-2" data-score="2">2</button>
-                        <button class="scout-score-btn scout-score-3" data-score="3">3</button>
+                <td data-element="${el}" data-player="${player.id}">
+                    <div class="scout-cell">
+                        <div class="scout-cell-stats-inline" data-action="history">
+                            <span class="scout-avg ${avgClass}">${avg}</span>
+                            <span class="scout-count">${scores.length}</span>
+                        </div>
+                        <div class="scout-score-btns${isBinary ? ' scout-binary' : ''}">
+                            ${scoreButtons}
+                        </div>
                     </div>
                 </td>
             `;
         });
 
+        // Keyboard shortcut badge (for first 9 players)
+        const keyboardKey = index < 9 ? index + 1 : null;
+        const keyBadge = keyboardKey ? `<span class="scout-key-badge" title="Taste ${keyboardKey}">${keyboardKey}</span>` : '';
+
+        // On-court styling based on position in list (not toggle)
+        const onCourtClass = isOnCourt ? 'scout-on-court' : 'scout-on-bench';
+        const liberoClass = player.position === 'L' ? 'scout-libero' : '';
+
         return `
-            <tr class="scout-row" data-player-id="${player.id}" data-index="${index}">
-                <td class="scout-player-cell">
-                    <div class="scout-player-info">
-                        <span class="scout-active-toggle ${player.active ? 'active' : ''}" 
-                              data-action="toggle-active" title="Startaufstellung"></span>
-                        <span class="scout-player-number" data-action="edit-number">
-                            ${player.number ? '#' + player.number : '#'}
-                        </span>
-                        <span class="scout-player-name">${this.escapeHtml(player.name)}</span>
-                        <span class="scout-position-badge ${posClass}" data-action="cycle-position">
-                            ${player.position || '?'}
-                        </span>
+            <tr class="scout-row ${onCourtClass} ${liberoClass}" data-player-id="${player.id}" data-index="${index}" draggable="true">
+                <td class="scout-td-player">
+                    <div class="scout-player-row-content">
+                        <div class="scout-player-info">
+                            <span class="scout-drag-handle" title="Ziehen zum Verschieben">⋮⋮</span>
+                            ${keyBadge}
+                            <span class="scout-player-number" data-action="edit-number">
+                                ${player.number ? '#' + player.number : '#'}
+                            </span>
+                            <span class="scout-player-name">${this.escapeHtml(player.name)}</span>
+                            <span class="scout-position-badge ${posClass}" data-action="cycle-position">
+                                ${player.position || '?'}
+                            </span>
+                        </div>
                     </div>
                 </td>
                 ${cellsHtml}
                 <td class="scout-actions-cell">
-                    <button class="scout-player-delete" data-action="delete" title="Spieler entfernen">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
+                    <div class="scout-player-actions">
+                        <button class="scout-player-delete" data-action="delete" title="Spieler entfernen">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -322,16 +382,18 @@ class ScoutEngineModular {
             const result = ScoutStats.calcTeamAvg(this.state.players, el);
             const avgClass = ScoutStats.getAverageClass(result.avg);
             cellsHtml += `
-                <td class="scout-cell scout-team-cell">
-                    <span class="scout-avg ${avgClass}">${result.avg}</span>
-                    <span class="scout-count">${result.count}</span>
+                <td>
+                    <div class="scout-cell scout-team-cell">
+                        <span class="scout-cell-avg ${avgClass}">${result.avg}</span>
+                        <span class="scout-cell-count">${result.count}</span>
+                    </div>
                 </td>
             `;
         });
 
         return `
             <tr class="scout-team-row">
-                <td class="scout-player-cell"><strong>Team</strong></td>
+                <td class="scout-td-player"><strong>TEAM</strong></td>
                 ${cellsHtml}
                 <td></td>
             </tr>
@@ -381,9 +443,9 @@ class ScoutEngineModular {
                     break;
 
                 case 'history':
-                    const cell = target.closest('.scout-cell');
-                    if (cell) {
-                        const element = cell.dataset.element;
+                    const historyTd = target.closest('td[data-element]');
+                    if (historyTd) {
+                        const element = historyTd.dataset.element;
                         this.showScoreHistoryModal(playerId, element);
                     }
                     break;
@@ -393,8 +455,8 @@ class ScoutEngineModular {
             const scoreBtn = target.closest('.scout-score-btn');
             if (scoreBtn) {
                 const score = parseInt(scoreBtn.dataset.score);
-                const cell = scoreBtn.closest('.scout-cell');
-                const element = cell?.dataset.element;
+                const cellTd = scoreBtn.closest('td[data-element]');
+                const element = cellTd?.dataset.element;
 
                 if (playerId && element !== undefined) {
                     this.state.addScore(playerId, element, score);
@@ -505,6 +567,92 @@ class ScoutEngineModular {
     destroy() {
         this.api.destroy();
         this.keyboard.destroy();
+    }
+
+    /**
+     * Bind header action buttons (Spieler, Neues Spiel, Hilfe, Export)
+     */
+    bindHeaderButtons() {
+        document.getElementById('scoutAddPlayer')?.addEventListener('click', () => this.showImportModal());
+        document.getElementById('scoutAddPlayerEmpty')?.addEventListener('click', () => this.showImportModal());
+        document.getElementById('scoutNewMatch')?.addEventListener('click', () => this.newMatch());
+        document.getElementById('scoutHelp')?.addEventListener('click', () => this.showHelpModal());
+        document.getElementById('scoutExport')?.addEventListener('click', () => this.exportData());
+    }
+
+    /**
+     * Show player import modal
+     */
+    showImportModal() {
+        // Check if legacy modal implementation exists
+        if (window.scoutEngine?.showImportModal) {
+            window.scoutEngine.showImportModal();
+            return;
+        }
+
+        // Simple fallback: prompt for player name
+        const name = prompt('Spielername:');
+        if (name && name.trim()) {
+            const number = prompt('Trikotnummer (optional):');
+            this.addPlayer(name, number ? parseInt(number) : null);
+        }
+    }
+
+    /**
+     * Start new match (reset all data)
+     */
+    newMatch() {
+        if (confirm('Neues Spiel starten? Alle aktuellen Statistiken werden zurückgesetzt.')) {
+            this.state.reset();
+            this.render();
+            this.state.saveLocal();
+            this.syncToServer();
+            console.log('[ScoutEngine] New match started');
+        }
+    }
+
+    /**
+     * Show help modal with keyboard shortcuts
+     */
+    showHelpModal() {
+        // Check if legacy modal implementation exists
+        if (window.scoutEngine?.showHelpModal) {
+            window.scoutEngine.showHelpModal();
+            return;
+        }
+
+        // Simple fallback: alert with shortcuts
+        alert(
+            'Quick-Scout Tastenkürzel:\n\n' +
+            '1-9: Spieler auswählen\n' +
+            'A: Aufschlag\n' +
+            'S: Annahme\n' +
+            'G: Angriff\n' +
+            'B: Block\n' +
+            'F: Feldabwehr\n' +
+            'R: Freeball\n' +
+            '0-3: Bewertung vergeben\n' +
+            'Z: Rückgängig\n' +
+            'ESC: Auswahl aufheben'
+        );
+    }
+
+    /**
+     * Export match data as JSON file
+     */
+    exportData() {
+        const data = this.state.toJSON();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeName = (this.state.matchName || 'scout_export').replace(/[^a-zA-Z0-9]/g, '_');
+        a.download = `${safeName}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('[ScoutEngine] Data exported');
     }
 }
 
