@@ -27,9 +27,14 @@
 <!-- Shared config (must load first) -->
 <script src="config.js?v=1"></script>
 
-<!-- Client-side auth check (backup for cached pages) -->
+<!-- Client-side auth check (bypass for localhost development) -->
 <script>
     (function () {
+        // Skip auth check for local development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('[Auth] Skipped - localhost development mode');
+            return;
+        }
         fetch('/api/auth/session', { credentials: 'same-origin' })
             .then(r => r.json())
             .then(d => { if (!d.authenticated) window.location.href = '/login.html'; })
@@ -37,84 +42,163 @@
     })();
 </script>
 
-<body>
+<body class="has-sidebar">
     <div class="app">
-        <!-- Top Navigation Bar -->
-        <nav class="top-nav" id="topNav">
-            <div class="nav-brand">
-                <svg class="nav-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
-                </svg>
-                <span class="nav-title">VolleyBratans</span>
+        <!-- Sidebar Navigation - Moneyball Style -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+                    </svg>
+                    <span class="sidebar-brand-text">VB Stream</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar [">
+                    <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                </button>
             </div>
-            <div class="nav-links">
-                <a href="#dashboard" class="nav-link active" data-page="dashboard">
-                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="9" />
-                        <rect x="14" y="3" width="7" height="5" />
-                        <rect x="14" y="12" width="7" height="9" />
-                        <rect x="3" y="16" width="7" height="5" />
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#cameras" class="nav-link" data-page="cameras">
-                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path
-                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    <span>Cameras</span>
-                </a>
-                <a href="#statistics" class="nav-link" data-page="statistics">
-                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 20V10M12 20V4M6 20v-6" />
-                    </svg>
-                    <span>Statistics</span>
-                </a>
-                <a href="matchday.html" class="nav-link">
-                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <span>Spieltag</span>
-                </a>
-                <!-- Overlays tab disabled for production -->
-            </div>
-            <div class="nav-actions">
-                <div class="nav-status" id="navConnectionStatus">
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <span class="sidebar-section-title">Hauptmenü</span>
+                    <a href="#dashboard" class="sidebar-item active" data-page="dashboard">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="7" height="9" />
+                            <rect x="14" y="3" width="7" height="5" />
+                            <rect x="14" y="12" width="7" height="9" />
+                            <rect x="3" y="16" width="7" height="5" />
+                        </svg>
+                        <span class="sidebar-item-label">Dashboard</span>
+                    </a>
+                    <a href="#cameras" class="sidebar-item" data-page="cameras">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span class="sidebar-item-label">Cameras</span>
+                    </a>
+                    <a href="#statistics" class="sidebar-item" data-page="statistics">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 20V10M12 20V4M6 20v-6" />
+                        </svg>
+                        <span class="sidebar-item-label">Live Scout</span>
+                    </a>
+                    <a href="#matchday" class="sidebar-item" data-page="matchday">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span class="sidebar-item-label">Spieltag</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section" style="margin-top: var(--space-lg);">
+                    <span class="sidebar-section-title">Extras</span>
+                    <a href="overlay/index.html" class="sidebar-item sidebar-item-external" target="_blank">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                        <span class="sidebar-item-label">Overlays</span>
+                        <svg class="sidebar-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                    <a href="#help" class="sidebar-item" data-page="help">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        <span class="sidebar-item-label">Hilfe</span>
+                    </a>
+                    <a href="coach.html" class="sidebar-item sidebar-item-external" target="_blank">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        <span class="sidebar-item-label">Coach View</span>
+                        <svg class="sidebar-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="nav-status" id="navConnectionStatus" style="margin-bottom: var(--space-sm);">
                     <span class="status-dot status-disconnected" id="navStatusDot"></span>
                     <span class="nav-status-text" id="navStatusText">Offline</span>
                 </div>
-                <!-- Theme Toggle -->
-                <button class="nav-theme-btn" id="themeToggle" title="Toggle Theme">
-                    <svg class="icon-sm theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                <button class="sidebar-item" id="themeToggle" title="Toggle Theme">
+                    <svg class="sidebar-item-icon theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
-                    <svg class="icon-sm theme-icon-light hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <svg class="sidebar-item-icon theme-icon-light hidden" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <span class="sidebar-item-label">Theme</span>
+                </button>
+                <a href="/api/auth/logout" class="sidebar-item">
+                    <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
-                </button>
-                <button class="nav-settings-btn" id="navSettingsBtn" title="Settings">
-                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3" />
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg>
-                </button>
+                    <span class="sidebar-item-label">Logout</span>
+                </a>
             </div>
-        </nav>
+
+            <div class="sidebar-keyboard-hint">
+                Press <kbd>[</kbd> to collapse
+            </div>
+        </aside>
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+        </button>
 
         <!-- Main Content Area -->
         <main class="main-content" id="mainContent">
@@ -770,7 +854,279 @@
                 </div>
             </section>
 
-            <!-- Overlays page disabled for production - Phase 4 feature -->
+            <!-- Page: Matchday -->
+            <section class="page" id="page-matchday">
+                <div class="page-header">
+                    <h1 class="page-title">Spieltag Konfiguration</h1>
+                    <p class="page-subtitle">Zentrale Verwaltung für Scoreboard, Scout und Overlays</p>
+                </div>
+
+                <div class="matchday-grid">
+                    <!-- DVV Helper Card -->
+                    <div class="matchday-card">
+                        <div class="matchday-card-header">
+                            <h2 class="matchday-card-title">
+                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                </svg>
+                                DVV Integration
+                            </h2>
+                        </div>
+                        <div class="matchday-form-group">
+                            <label class="matchday-label">DVV Ticker / Stream Link</label>
+                            <div class="matchday-dvv-row">
+                                <input type="text" id="dvvLinkInput" class="matchday-input"
+                                    placeholder="https://dvv.sams-ticker.de/stream/...">
+                                <button id="importDvvBtn" class="btn-base btn-primary-v btn-sm">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                    Laden
+                                </button>
+                            </div>
+                            <small class="text-muted text-sm mt-2 block">
+                                Importiert Teamnamen und Datum automatisch aus dem DVV Ticker.
+                            </small>
+                        </div>
+                        <div id="dvvStatus" class="hidden matchday-status-badge"></div>
+                    </div>
+
+                    <!-- Global Teams Card -->
+                    <div class="matchday-card">
+                        <div class="matchday-card-header">
+                            <h2 class="matchday-card-title">
+                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z" />
+                                </svg>
+                                Globale Teams
+                            </h2>
+                        </div>
+                        <div class="matchday-form-group">
+                            <label class="matchday-label">Heimmannschaft</label>
+                            <input type="text" id="globalHomeTeam" class="matchday-input"
+                                placeholder="z.B. Volley Bratans">
+                        </div>
+                        <div class="matchday-form-group">
+                            <label class="matchday-label">Gastmannschaft</label>
+                            <input type="text" id="globalAwayTeam" class="matchday-input" placeholder="z.B. Gegner VC">
+                        </div>
+                        <div class="matchday-teams-preview">
+                            <div class="matchday-team-display" id="previewHome">--</div>
+                            <div class="matchday-vs">VS</div>
+                            <div class="matchday-team-display" id="previewAway">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Card -->
+                    <div class="matchday-card">
+                        <div class="matchday-card-header">
+                            <h2 class="matchday-card-title">
+                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                Metadaten
+                            </h2>
+                        </div>
+                        <div class="matchday-form-group">
+                            <label class="matchday-label">Datum</label>
+                            <input type="date" id="matchDate" class="matchday-input">
+                        </div>
+                        <div class="matchday-form-group">
+                            <label class="matchday-label">Match ID (Optional)</label>
+                            <input type="text" id="matchId" class="matchday-input" placeholder="Autom. aus DVV Link"
+                                readonly>
+                        </div>
+                        <div class="matchday-form-group" style="margin-top: var(--space-6);">
+                            <button id="resetMatchdayBtn" class="btn-base btn-secondary-v btn-block"
+                                style="width: 100%;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10" />
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                                </svg>
+                                Zurücksetzen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="matchday-actions">
+                    <button id="saveMatchdayBtn" class="btn-base btn-primary-v btn-lg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                            <polyline points="17 21 17 13 7 13 7 21" />
+                            <polyline points="7 3 7 8 15 8" />
+                        </svg>
+                        Alle Änderungen speichern
+                    </button>
+                </div>
+            </section>
+
+            <!-- Page: Help -->
+            <section class="page" id="page-help">
+                <div class="page-header">
+                    <h1 class="page-title">📖 Scout Hilfe</h1>
+                    <p class="page-subtitle">Vollständige Dokumentation aller Funktionen</p>
+                </div>
+
+                <!-- Bewertungsskala -->
+                <div class="help-section">
+                    <h2>📊 Bewertungsskala (0-3)</h2>
+                    <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">
+                        Jede Aktion wird auf einer Skala von 0 bis 3 bewertet:
+                    </p>
+                    <div class="score-grid">
+                        <div class="score-card">
+                            <div class="score-badge score-3">3</div>
+                            <div>
+                                <strong>Perfekt / Direkter Punkt</strong>
+                                <p
+                                    style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                                    Aufschlag-Ass, Kill, Block-Point, perfekter Pass
+                                </p>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-badge score-2">2</div>
+                            <div>
+                                <strong>Gut mit kleinen Mängeln</strong>
+                                <p
+                                    style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                                    Angriff geblockt aber im Spiel, gute Annahme
+                                </p>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-badge score-1">1</div>
+                            <div>
+                                <strong>Ohne Wirkung / Neutral</strong>
+                                <p
+                                    style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                                    Ball im Spiel aber keine Wirkung für uns
+                                </p>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-badge score-0">0</div>
+                            <div>
+                                <strong>Fehler = Punkt für Gegner</strong>
+                                <p
+                                    style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px;">
+                                    Aufschlagfehler, Netzfehler, Aus
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tastaturkürzel -->
+                <div class="help-section">
+                    <h2>⌨️ Tastaturkürzel (Quick-Scout)</h2>
+                    <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">
+                        Schnelle Eingabe in 3 Schritten: <strong>Spieler → Element → Wertung</strong>
+                    </p>
+                    <div class="shortcut-grid">
+                        <div class="shortcut-card">
+                            <h4>1️⃣ Spieler wählen</h4>
+                            <p><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> <kbd>5</kbd> <kbd>6</kbd>
+                                <kbd>7</kbd>
+                                <kbd>8</kbd> <kbd>9</kbd>
+                            </p>
+                            <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: 8px;">
+                                Entspricht
+                                der Reihenfolge in der Liste</p>
+                        </div>
+                        <div class="shortcut-card">
+                            <h4>2️⃣ Element wählen</h4>
+                            <p>
+                                <kbd>A</kbd> = Aufschlag<br>
+                                <kbd>S</kbd> = Annahme (Serve-Receive)<br>
+                                <kbd>G</kbd> = Angriff<br>
+                                <kbd>B</kbd> = Block<br>
+                                <kbd>F</kbd> = Feldabwehr<br>
+                                <kbd>R</kbd> = Freeball
+                            </p>
+                        </div>
+                        <div class="shortcut-card">
+                            <h4>3️⃣ Wertung eingeben</h4>
+                            <p><kbd>0</kbd> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+                            <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: 8px;">
+                                Siehe
+                                Bewertungsskala oben</p>
+                        </div>
+                        <div class="shortcut-card">
+                            <h4>🔧 Aktionen</h4>
+                            <p>
+                                <kbd>Z</kbd> = Letzte Eingabe rückgängig<br>
+                                <kbd>?</kbd> = Hilfe anzeigen<br>
+                                <kbd>Esc</kbd> = Auswahl abbrechen
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spielerverwaltung -->
+                <div class="help-section">
+                    <h2>👥 Spieler verwalten</h2>
+                    <ul class="feature-list">
+                        <li>
+                            <span class="feature-icon">➕</span>
+                            <div>
+                                <strong>Spieler hinzufügen</strong>
+                                <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                                    Klicke auf "Spieler" → Name eingeben und hinzufügen
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="feature-icon">🗑️</span>
+                            <div>
+                                <strong>Spieler entfernen</strong>
+                                <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                                    Hover über einen Spieler → Klicke auf das rote X rechts
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="feature-icon">#️⃣</span>
+                            <div>
+                                <strong>Trikotnummer ändern</strong>
+                                <p style="color: var(--color-text-secondary); font-size: var(--text-sm);">
+                                    Klicke auf "#" oder die Nummer neben dem Spielernamen
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Coach Dashboard CTA -->
+                <div class="cta-card" style="margin-top: var(--space-8);">
+                    <h3>📋 Coach Dashboard</h3>
+                    <p style="color: var(--color-text-secondary);">
+                        Separate Seite mit allen wichtigen Live-Statistiken für Trainer.
+                    </p>
+                    <a href="coach.html" target="_blank" class="cta-link">
+                        Coach Dashboard öffnen
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                </div>
+            </section>
         </main>
 
         <!-- Add Profile Modal -->
@@ -899,6 +1255,8 @@
             </div>
         </div>
     </div>
+    <script src="sidebar.js?v=1"></script>
+    <script src="matchday.js?v=1"></script>
     <script src="app.js?v=3"></script>
     <script type="module" src="js/scout-main.js"></script>
     <script src="router.js?v=1"></script>

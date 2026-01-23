@@ -5,7 +5,7 @@
 
 class Router {
     constructor() {
-        this.pages = ['dashboard', 'cameras', 'statistics', 'overlays'];
+        this.pages = ['dashboard', 'cameras', 'statistics', 'matchday', 'overlays', 'help'];
         this.init();
     }
 
