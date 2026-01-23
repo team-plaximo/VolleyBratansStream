@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 	"github.com/volleybratans/moblin-relay/services"
