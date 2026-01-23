@@ -12,8 +12,16 @@
 | **Event-Listener** | Guard-Flag gegen Double-Firing |
 | **JS-Updates** | Cache-Bust erhöhen: `?v=N+1` |
 | **Debugging** | `window.obj.method.toString()` im Browser |
+| **Environment Parity** | Local → Push → Deploy → Verify (KEIN Shortcut!) |
 
 → Details in `GEMINI.md`
+
+---
+
+## 📚 Mandatory Reading (vor jedem Deploy)
+
+- [`docs/pre-push-checklist.md`](../docs/pre-push-checklist.md) - Pre-Push Checkliste
+- `/environment-sync` Workflow ausführen bei größeren Änderungen
 
 ---
 
@@ -31,6 +39,7 @@ URL: https://stream.volleybratans.com
 
 | Workflow | Trigger |
 |----------|---------|
+| **Prompt Expert** | `/prompt` |
 | Debug Live-Site | `/debug-live-site` |
 | Deploy | `/deploy` |
 | Verify Changes | `/verify-changes` |

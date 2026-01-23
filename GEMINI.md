@@ -54,6 +54,28 @@ window.scoutEngine?.addScore?.toString()  // Zeigt echten Server-Code
 typeof variable                            // Type-Check
 ```
 
+### 5. Environment Parity Protocol 🔴
+
+> **HARD CONSTRAINT**: Alle Änderungen folgen dem 4-Phasen-Deployment-Protokoll.
+
+```
+┌─────────┐    ┌──────┐    ┌────────┐    ┌────────┐
+│ 1. Lokal│ → │2.Push│ → │3.Deploy│ → │4.Verify│
+│  Test   │    │  Git │    │ Server │    │  Live  │
+└─────────┘    └──────┘    └────────┘    └────────┘
+```
+
+**BEVOR du Code pushst:**
+- Lokaler Test mit `python -m http.server 8088` **ODER** `docker compose -f docker-compose.dev.yml up`
+- Browser DevTools Console: **KEINE JavaScript-Fehler**
+- `docs/pre-push-checklist.md` durcharbeiten
+
+**NACH jedem Deploy:**
+- `/environment-sync` ausführen **ODER** manuell Git-Hash-Parity prüfen
+- Health Check: `curl https://stream.volleybratans.com/health`
+
+❌ **VERBOTEN**: Direkt auf dem Server entwickeln | Push ohne lokalen Test | Deploy ohne Verification
+
 ---
 
 ## 🖥️ Server & Deployment
@@ -78,11 +100,36 @@ cd /root/VolleyBratansStream; git pull; docker compose up -d --build
 
 | Workflow | Beschreibung |
 |----------|--------------|
+| `/environment-sync` | Environment Parity Check (Lokal vs. Produktion) |
 | `/debug-live-site` | Live-Site Debugging (Local vs Online) |
 | `/deploy` | Quick-Deploy zum Server |
 | `/verify-changes` | Verification nach Änderungen |
 
 ---
+
+## 🔄 Environment Parity (WICHTIG!)
+
+> **Vor jedem größeren Push:** `/environment-sync` ausführen!
+
+### Regel: Local → Push → Deploy → Verify
+
+```
+┌─────────┐    ┌──────┐    ┌────────┐    ┌────────┐
+│ Lokal   │ → │ Push │ → │ Deploy │ → │ Verify │
+│ Testen  │    │ Git  │    │ Server │    │ Live   │
+└─────────┘    └──────┘    └────────┘    └────────┘
+```
+
+### ❌ NIEMALS direkt auf dem Server entwickeln!
+
+### Referenz-Dateien
+
+| Datei | Zweck |
+|-------|-------|
+| `docker-compose.yml` | Produktion |
+| `docker-compose.dev.yml` | Lokale Docker-Entwicklung |
+| `.env.production` | Produktions-Umgebung |
+| `docs/pre-push-checklist.md` | Pre-Push Checkliste |
 
 ## 📂 Struktur
 
