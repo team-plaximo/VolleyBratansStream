@@ -411,6 +411,13 @@ func main() {
 	}
 	log.Printf("[SCOUT] State store initialized at %s", *dataDir)
 
+	// Initialize Matchday Store
+	matchdayStore, err := NewMatchdayStore(*dataDir)
+	if err != nil {
+		log.Fatalf("Failed to initialize matchday store: %v", err)
+	}
+	log.Printf("[MATCHDAY] Store initialized at %s", *dataDir)
+
 	// Initialize Authentication System
 	InitAuth(*dataDir, *authPIN)
 
@@ -482,6 +489,14 @@ func main() {
 		handleScoutArchive(w, r, scoutStore)
 	})))
 
+	// Matchday
+	http.HandleFunc("/api/matchday", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handleMatchdayAPI(w, r, matchdayStore, relay)
+	})))
+	http.HandleFunc("/api/matchday/parse", corsMiddleware(authMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handleMatchdayParse(w, r, matchdayStore)
+	})))
+
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("╔════════════════════════════════════════════════╗")
 	log.Printf("║  VolleyBratans Stream Platform                 ║")
@@ -527,6 +542,66 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		next(w, r)
 	}
+}
+
+// handleMatchdayAPI handles GET/POST for matchday configuration
+func handleMatchdayAPI(w http.ResponseWriter, r *http.Request, store *MatchdayStore, relay *Relay) {
+	w.Header().Set("Content-Type", "application/json")
+
+	switch r.Method {
+	case "GET":
+		state := store.GetState()
+		json.NewEncoder(w).Encode(state)
+
+	case "POST":
+		var newState MatchdayState
+		if err := json.NewDecoder(r.Body).Decode(&newState); err != nil {
+			http.Error(w, `{"error": "Invalid JSON"}`, http.StatusBadRequest)
+			return
+		}
+
+		if err := store.UpdateState(newState); err != nil {
+			http.Error(w, `{"error": "Failed to save state"}`, http.StatusInternalServerError)
+			return
+		}
+
+		updatedState := store.GetState()
+		log.Printf("[MATCHDAY] State updated (version %d)", updatedState.Version)
+
+		// Broadcast update to all connected browsers
+		broadcastMsg := map[string]interface{}{
+			"type":    "matchday_update",
+			"version": updatedState.Version,
+			"data":    updatedState,
+		}
+		broadcastData, _ := json.Marshal(broadcastMsg)
+		relay.broadcast <- broadcastData
+
+		json.NewEncoder(w).Encode(updatedState)
+
+	default:
+		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
+	}
+}
+
+// handleMatchdayParse fetches and parses a DVV link
+func handleMatchdayParse(w http.ResponseWriter, r *http.Request, store *MatchdayStore) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	url := r.URL.Query().Get("url")
+	if url == "" {
+		http.Error(w, `{"error": "Missing url parameter"}`, http.StatusBadRequest)
+		return
+	}
+	
+	result, err := store.ParseDVV(url)
+	if err != nil {
+		log.Printf("[MATCHDAY] Parse error: %v", err)
+		http.Error(w, fmt.Sprintf(`{"error": "%v"}`, err), http.StatusBadRequest)
+		return
+	}
+	
+	json.NewEncoder(w).Encode(result)
 }
 
 // handleScoutAPI handles GET/POST for scout state
@@ -598,4 +673,5 @@ func handleScoutArchive(w http.ResponseWriter, r *http.Request, store *ScoutStor
 		"message": "Match archived successfully",
 	})
 }
+
 

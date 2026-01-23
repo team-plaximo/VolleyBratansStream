@@ -194,6 +194,26 @@ class Scoreboard {
         this.render();
     }
 
+    // Get Matchday Config
+    getMatchdayData() {
+        try {
+            const json = localStorage.getItem(window.VB?.STORAGE_KEYS?.MATCHDAY);
+            return json ? JSON.parse(json) : null;
+        } catch (e) { return null; }
+    }
+
+    getHomeTeam() {
+        if (this.data.homeTeam) return this.data.homeTeam;
+        const md = this.getMatchdayData();
+        return md ? md.homeTeam : '';
+    }
+
+    getAwayTeam() {
+        if (this.data.awayTeam) return this.data.awayTeam;
+        const md = this.getMatchdayData();
+        return md ? md.awayTeam : '';
+    }
+
     render() {
         if (!this.el.homePoints) return;
 
@@ -202,6 +222,13 @@ class Scoreboard {
         this.el.homeSets.textContent = this.data.homeSets;
         this.el.awaySets.textContent = this.data.awaySets;
         this.el.currentSet.textContent = `Satz ${this.data.currentSet}`;
+
+        // Update placeholders with global teams
+        const md = this.getMatchdayData();
+        if (md && this.el.homeTeam && this.el.awayTeam) {
+            this.el.homeTeam.placeholder = md.homeTeam || 'Heim';
+            this.el.awayTeam.placeholder = md.awayTeam || 'Gast';
+        }
 
         // Render set history
         if (this.el.setHistory) {
@@ -216,8 +243,8 @@ class Scoreboard {
         return {
             ...this.data,
             teams: {
-                home: this.data.homeTeam || 'Heim',
-                away: this.data.awayTeam || 'Gast'
+                home: this.getHomeTeam() || 'Heim',
+                away: this.getAwayTeam() || 'Gast'
             },
             sets: {
                 home: this.data.homeSets,

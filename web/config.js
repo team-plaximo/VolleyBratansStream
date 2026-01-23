@@ -33,6 +33,7 @@ window.VolleyBratans.getApiBase = function () {
 window.VolleyBratans.STORAGE_KEYS = {
     SCOUT: 'volleybratans_scout',
     SCOREBOARD: 'volleybratans_scoreboard',
+    MATCHDAY: 'volleybratans_matchday',
     PROFILES: 'volleybratans_profiles',
     THEME: 'volleybratans_theme'
 };
@@ -43,6 +44,8 @@ window.VolleyBratans.STORAGE_KEYS = {
 window.VolleyBratans.API = {
     SCOUT: '/api/scout',
     SCOUT_VERSION: '/api/scout/version',
+    MATCHDAY: '/api/matchday',
+    MATCHDAY_PARSE: '/api/matchday/parse',
     AUTH_SESSION: '/api/auth/session',
     AUTH_LOGIN: '/api/auth/login',
     AUTH_LOGOUT: '/api/auth/logout'

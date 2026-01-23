@@ -8,9 +8,9 @@
    ============================================ */
 
 :root {
-    /* Plaximo Teal Primary */
-    --color-primary: hsl(174, 61%, 45%);
-    --color-primary-light: hsl(174, 61%, 55%);
+    /* Plaximo Teal Primary (Matches styles.css --teal-500) */
+    --color-primary: hsl(173, 80%, 40%);
+    --color-primary-light: hsl(172, 66%, 58%);
 
     /* Dark Theme */
     --bg-scoreboard: rgba(15, 20, 25, 0.95);

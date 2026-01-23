@@ -101,10 +101,27 @@ class ScoutEngine {
 
         return {
             version: 0,
-            matchName: '',
-            matchDate: new Date().toISOString().split('T')[0],
+            matchName: this.getMatchdayDefaultName(),
+            matchDate: this.getMatchdayDefaultDate(),
             players: []
         };
+    }
+
+    getMatchdayConfig() {
+        try {
+            const json = localStorage.getItem(window.VB?.STORAGE_KEYS?.MATCHDAY);
+            return json ? JSON.parse(json) : null;
+        } catch (e) { return null; }
+    }
+
+    getMatchdayDefaultName() {
+        const md = this.getMatchdayConfig();
+        return md ? `${md.homeTeam} vs ${md.awayTeam}` : '';
+    }
+
+    getMatchdayDefaultDate() {
+        const md = this.getMatchdayConfig();
+        return md ? md.date : new Date().toISOString().split('T')[0];
     }
 
     /**
