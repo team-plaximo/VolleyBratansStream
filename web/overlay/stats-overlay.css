@@ -1,0 +1,428 @@
+/**
+ * Statistics Overlay - Olympic-Style Broadcast Design
+ * Professional set statistics for OBS Browser Source
+ * 
+ * @version 1.0.0
+ * @author VolleyBratans Stream Platform
+ */
+
+/* ============================================
+   CSS Custom Properties
+   ============================================ */
+
+:root {
+    /* Plaximo Teal Primary */
+    --teal-500: hsl(173, 80%, 40%);
+    --teal-400: hsl(173, 70%, 50%);
+    --teal-600: hsl(173, 80%, 32%);
+    --teal-glow: rgba(13, 148, 136, 0.4);
+
+    /* Dark Theme - Glassmorphism */
+    --overlay-bg: rgba(15, 23, 42, 0.88);
+    --glass-bg: rgba(30, 41, 59, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: 16px;
+
+    /* Text */
+    --text-primary: hsl(0, 0%, 98%);
+    --text-secondary: hsl(215, 20%, 65%);
+    --text-muted: hsl(215, 15%, 50%);
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Typography */
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* Animation */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+}
+
+/* Transparent Theme for OBS */
+[data-theme="transparent"] {
+    --overlay-bg: rgba(15, 23, 42, 0.75);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    font-family: var(--font);
+    background: transparent;
+    color: var(--text-primary);
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   Stats Overlay Container
+   ============================================ */
+
+.stats-overlay {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 480px;
+    background: var(--overlay-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* ============================================
+   Header Section
+   ============================================ */
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--teal-600) 0%, var(--teal-500) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.team-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+}
+
+.team-logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.set-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.set-badge.total {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-sm) 0;
+}
+
+.stat-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--glass-border);
+    transition: background var(--transition-fast);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Stat Icon */
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    font-size: 18px;
+}
+
+/* Stat Label */
+.stat-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-description {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Stat Value */
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    min-width: 48px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.stat-value.highlight {
+    color: var(--teal-400);
+}
+
+/* Value Change Animation */
+.stat-value.changed {
+    animation: valuePopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes valuePopIn {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+        color: var(--teal-400);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   Footer / Download Section
+   ============================================ */
+
+.stats-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--glass-bg);
+    border-top: 1px solid var(--glass-border);
+}
+
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--teal-500);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.download-btn:hover {
+    background: var(--teal-400);
+    transform: translateY(-1px);
+}
+
+.download-btn:active {
+    transform: translateY(0);
+}
+
+.download-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Hide download in OBS mode */
+[data-obs="true"] .stats-footer {
+    display: none;
+}
+
+/* ============================================
+   Loading & Error States
+   ============================================ */
+
+.stats-loading,
+.stats-error,
+.stats-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    text-align: center;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--glass-border);
+    border-top-color: var(--teal-500);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.stats-error {
+    color: hsl(0, 70%, 60%);
+}
+
+.stats-empty {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   Size Variations (for different OBS resolutions)
+   ============================================ */
+
+[data-size="small"] .stats-overlay {
+    max-width: 360px;
+}
+
+[data-size="small"] .header-title {
+    font-size: 15px;
+}
+
+[data-size="small"] .stat-value {
+    font-size: 22px;
+}
+
+[data-size="small"] .stat-row {
+    padding: var(--space-sm) var(--space-md);
+}
+
+[data-size="large"] .stats-overlay {
+    max-width: 560px;
+}
+
+[data-size="large"] .header-title {
+    font-size: 22px;
+}
+
+[data-size="large"] .stat-value {
+    font-size: 34px;
+}
+
+/* ============================================
+   Print / Screenshot Optimization
+   ============================================ */
+
+@media print {
+    body {
+        background: white !important;
+    }
+
+    .stats-overlay {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .download-btn {
+        display: none;
+    }
+}
+
+/* ============================================
+   Responsive (for standalone browser view)
+   ============================================ */
+
+@media (max-width: 520px) {
+    .stats-overlay {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .stat-row {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+}

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Volleyball Satz-Statistik Overlay - Broadcast-Quality für OBS">
+    <title>Volleybratans Statistik Overlay</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/branding/favicon.ico">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stats-overlay.css?v=1">
+</head>
+
+<!-- Shared config -->
+<script src="../config.js?v=1"></script>
+
+<body>
+    <!-- Stats Overlay Container -->
+    <div class="stats-overlay" id="statsOverlay">
+
+        <!-- Header -->
+        <div class="stats-header">
+            <img src="../assets/branding/logo-white.svg" alt="VolleyBratans" class="team-logo" width="48" height="48">
+            <div class="header-text">
+                <h1 class="header-title">Volleybratans Statistik</h1>
+                <span class="header-subtitle" id="matchName">Spieltag</span>
+            </div>
+            <span class="set-badge" id="setBadge">Satz 1</span>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Aufschlag -->
+            <div class="stat-row" data-element="aufschlag">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">
+                    <span class="stat-name">Aufschlag</span>
+                    <span class="stat-description">Asse</span>
+                </div>
+                <span class="stat-value" id="statAufschlag">0</span>
+            </div>
+
+            <!-- Annahme -->
+            <div class="stat-row" data-element="annahme">
+                <div class="stat-icon">🙌</div>
+                <div class="stat-label">
+                    <span class="stat-name">Annahme</span>
+                    <span class="stat-description">Perfekt</span>
+                </div>
+                <span class="stat-value" id="statAnnahme">0</span>
+            </div>
+
+            <!-- Angriff -->
+            <div class="stat-row" data-element="angriff">
+                <div class="stat-icon">💥</div>
+                <div class="stat-label">
+                    <span class="stat-name">Angriff</span>
+                    <span class="stat-description">Kills</span>
+                </div>
+                <span class="stat-value" id="statAngriff">0</span>
+            </div>
+
+            <!-- Block -->
+            <div class="stat-row" data-element="block">
+                <div class="stat-icon">🧱</div>
+                <div class="stat-label">
+                    <span class="stat-name">Block</span>
+                    <span class="stat-description">Block-Punkte</span>
+                </div>
+                <span class="stat-value" id="statBlock">0</span>
+            </div>
+
+            <!-- Feldabwehr -->
+            <div class="stat-row" data-element="feldabwehr">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-label">
+                    <span class="stat-name">Feldabwehr</span>
+                    <span class="stat-description">Perfekte Verteidigung</span>
+                </div>
+                <span class="stat-value" id="statFeldabwehr">0</span>
+            </div>
+        </div>
+
+        <!-- Footer with Download Button (hidden in OBS mode) -->
+        <div class="stats-footer" id="statsFooter">
+            <button class="download-btn" id="downloadBtn" onclick="downloadAsImage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download PNG
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div class="stats-loading hidden" id="statsLoading">
+            <div class="spinner"></div>
+            <span>Lade Statistiken...</span>
+        </div>
+
+        <!-- Empty State -->
+        <div class="stats-empty hidden" id="statsEmpty">
+            <span>Keine Daten verfügbar</span>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Statistics Overlay - Olympic-Style
+         * Aggregates "3" ratings from ScoutState for set statistics
+         * 
+         * URL Parameters:
+         * - set=1|2|3|4|5 : Display specific set
+         * - set=total : Display combined stats
+         * - theme=dark|transparent : Visual theme
+         * - obs=true : Hide download button
+         * - size=small|medium|large : Scale variation
+         */
+
+        // ============================================
+        // Configuration
+        // ============================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const config = {
+            set: urlParams.get('set') || '1',
+            theme: urlParams.get('theme') || 'dark',
+            obs: urlParams.get('obs') === 'true',
+            size: urlParams.get('size') || 'medium',
+            poll: parseInt(urlParams.get('poll')) || 3000
+        };
+
+        // Storage key (same as Scout module)
+        const STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
+
+        // Elements we're tracking (excluding freeball)
+        const STAT_ELEMENTS = ['aufschlag', 'annahme', 'angriff', 'block', 'feldabwehr'];
+
+        // DOM Elements
+        const el = {
+            overlay: document.getElementById('statsOverlay'),
+            setBadge: document.getElementById('setBadge'),
+            matchName: document.getElementById('matchName'),
+            loading: document.getElementById('statsLoading'),
+            empty: document.getElementById('statsEmpty'),
+            grid: document.getElementById('statsGrid'),
+            footer: document.getElementById('statsFooter'),
+            stats: {
+                aufschlag: document.getElementById('statAufschlag'),
+                annahme: document.getElementById('statAnnahme'),
+                angriff: document.getElementById('statAngriff'),
+                block: document.getElementById('statBlock'),
+                feldabwehr: document.getElementById('statFeldabwehr')
+            }
+        };
+
+        let pollInterval = null;
+        let lastStats = {};
+
+        // ============================================
+        // Initialization
+        // ============================================
+
+        function init() {
+            applyConfig();
+            loadStats();
+            startPolling();
+        }
+
+        function applyConfig() {
+            // Theme
+            document.documentElement.setAttribute('data-theme', config.theme);
+            if (config.theme === 'transparent') {
+                document.body.style.background = 'transparent';
+            }
+
+            // OBS mode - hide footer
+            if (config.obs) {
+                document.body.setAttribute('data-obs', 'true');
+            }
+
+            // Size variation
+            if (config.size !== 'medium') {
+                document.body.setAttribute('data-size', config.size);
+            }
+
+            // Update badge
+            updateSetBadge();
+        }
+
+        function updateSetBadge() {
+            if (config.set === 'total') {
+                el.setBadge.textContent = 'Gesamt';
+                el.setBadge.classList.add('total');
+            } else {
+                el.setBadge.textContent = `Satz ${config.set}`;
+                el.setBadge.classList.remove('total');
+            }
+        }
+
+        // ============================================
+        // Stats Aggregation
+        // ============================================
+
+        /**
+         * Calculate stats from scout data
+         * Only counts scores with value === 3 (perfect/point-winning)
+         */
+        function calculateStats(scoutData) {
+            const stats = {};
+            STAT_ELEMENTS.forEach(el => stats[el] = 0);
+
+            if (!scoutData || !scoutData.players) {
+                return stats;
+            }
+
+            scoutData.players.forEach(player => {
+                if (!player.scores) return;
+
+                STAT_ELEMENTS.forEach(element => {
+                    const scores = player.scores[element] || [];
+                    // Count only "3" ratings
+                    const perfectCount = scores.filter(s => s === 3).length;
+                    stats[element] += perfectCount;
+                });
+            });
+
+            return stats;
+        }
+
+        /**
+         * Get stats for a specific set (future enhancement)
+         * Currently aggregates all data since ScoutState doesn't track per-set
+         */
+        function getSetStats(scoutData, setNumber) {
+            // TODO: If ScoutState gets per-set tracking, filter here
+            // For now, return total stats
+            return calculateStats(scoutData);
+        }
+
+        // ============================================
+        // Data Loading
+        // ============================================
+
+        function loadStats() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (!stored) {
+                    showEmpty();
+                    return;
+                }
+
+                const scoutData = JSON.parse(stored);
+
+                // Update match name if available
+                if (scoutData.matchName) {
+                    el.matchName.textContent = scoutData.matchName;
+                }
+
+                // Calculate and display stats
+                const stats = config.set === 'total'
+                    ? calculateStats(scoutData)
+                    : getSetStats(scoutData, parseInt(config.set));
+
+                updateDisplay(stats);
+                hideEmpty();
+
+            } catch (e) {
+                console.error('[StatsOverlay] Error loading stats:', e);
+                showEmpty();
+            }
+        }
+
+        function startPolling() {
+            pollInterval = setInterval(loadStats, config.poll);
+        }
+
+        // ============================================
+        // Display Updates
+        // ============================================
+
+        function updateDisplay(stats) {
+            STAT_ELEMENTS.forEach(element => {
+                const valueEl = el.stats[element];
+                if (!valueEl) return;
+
+                const newValue = stats[element] || 0;
+                const oldValue = parseInt(valueEl.textContent) || 0;
+
+                if (newValue !== oldValue) {
+                    valueEl.textContent = newValue;
+                    animateValue(valueEl);
+                }
+
+                // Highlight high values
+                if (newValue >= 10) {
+                    valueEl.classList.add('highlight');
+                } else {
+                    valueEl.classList.remove('highlight');
+                }
+            });
+
+            lastStats = { ...stats };
+        }
+
+        function animateValue(element) {
+            element.classList.remove('changed');
+            // Trigger reflow
+            void element.offsetWidth;
+            element.classList.add('changed');
+        }
+
+        function showEmpty() {
+            el.grid.classList.add('hidden');
+            el.empty.classList.remove('hidden');
+        }
+
+        function hideEmpty() {
+            el.empty.classList.add('hidden');
+            el.grid.classList.remove('hidden');
+        }
+
+        // ============================================
+        // Download as Image (Canvas API)
+        // ============================================
+
+        async function downloadAsImage() {
+            const overlay = el.overlay;
+            const btn = document.getElementById('downloadBtn');
+
+            // Temporarily hide footer for clean screenshot
+            el.footer.style.display = 'none';
+
+            try {
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Set dimensions (2x for retina quality)
+                const scale = 2;
+                const rect = overlay.getBoundingClientRect();
+                canvas.width = rect.width * scale;
+                canvas.height = (rect.height - 60) * scale; // Subtract footer height
+
+                // Use html-to-canvas approach with SVG foreignObject
+                const svgData = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="${rect.width}" height="${rect.height - 60}">
+                        <foreignObject width="100%" height="100%">
+                            <div xmlns="http://www.w3.org/1999/xhtml">
+                                ${overlay.outerHTML}
+                            </div>
+                        </foreignObject>
+                    </svg>
+                `;
+
+                // Fallback: Use simpler approach - just serialize to blob
+                // For proper rendering, we'll use a simplified approach
+                await renderCanvasFallback(canvas, ctx, scale);
+
+                // Trigger download
+                const link = document.createElement('a');
+                const setLabel = config.set === 'total' ? 'gesamt' : `satz-${config.set}`;
+                link.download = `volleybratans-statistik-${setLabel}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+            } catch (e) {
+                console.error('[StatsOverlay] Download error:', e);
+                alert('Download fehlgeschlagen. Bitte Screenshot verwenden.');
+            } finally {
+                // Restore footer
+                el.footer.style.display = '';
+            }
+        }
+
+        /**
+         * Fallback canvas rendering (manual draw)
+         */
+        async function renderCanvasFallback(canvas, ctx, scale) {
+            ctx.scale(scale, scale);
+
+            // Background
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+            ctx.roundRect(0, 0, canvas.width / scale, canvas.height / scale, 16);
+            ctx.fill();
+
+            // Header background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width / scale, 0);
+            gradient.addColorStop(0, 'hsl(173, 80%, 32%)');
+            gradient.addColorStop(1, 'hsl(173, 80%, 40%)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width / scale, 80);
+
+            // Header text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('Volleybratans Statistik', 72, 40);
+
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText(el.matchName.textContent, 72, 58);
+
+            // Set badge
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            const badgeText = el.setBadge.textContent;
+            const badgeWidth = ctx.measureText(badgeText).width + 24;
+            ctx.roundRect(canvas.width / scale - badgeWidth - 24, 28, badgeWidth, 28, 14);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.fillText(badgeText, canvas.width / scale - badgeWidth - 12, 47);
+
+            // Stats rows
+            const icons = ['🎯', '🙌', '💥', '🧱', '🛡️'];
+            const names = ['Aufschlag', 'Annahme', 'Angriff', 'Block', 'Feldabwehr'];
+            const descriptions = ['Asse', 'Perfekt', 'Kills', 'Block-Punkte', 'Perfekte Verteidigung'];
+
+            STAT_ELEMENTS.forEach((element, index) => {
+                const y = 100 + (index * 52);
+
+                // Row background on hover simulation
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
+                ctx.roundRect(16, y, canvas.width / scale - 32, 44, 6);
+                ctx.fill();
+
+                // Icon background
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+                ctx.roundRect(24, y + 4, 36, 36, 6);
+                ctx.fill();
+
+                // Icon (emoji)
+                ctx.font = '18px sans-serif';
+                ctx.fillText(icons[index], 32, y + 28);
+
+                // Label
+                ctx.fillStyle = 'hsl(0, 0%, 98%)';
+                ctx.font = '600 15px Inter, sans-serif';
+                ctx.fillText(names[index], 72, y + 22);
+
+                ctx.fillStyle = 'hsl(215, 15%, 50%)';
+                ctx.font = '500 11px Inter, sans-serif';
+                ctx.fillText(descriptions[index], 72, y + 38);
+
+                // Value
+                const value = lastStats[element] || 0;
+                ctx.fillStyle = value >= 10 ? 'hsl(173, 70%, 50%)' : 'hsl(0, 0%, 98%)';
+                ctx.font = '800 28px Inter, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(value.toString(), canvas.width / scale - 32, y + 32);
+                ctx.textAlign = 'left';
+            });
+        }
+
+        // Polyfill for roundRect if needed
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+
+        // ============================================
+        // Start
+        // ============================================
+
+        init();
+    </script>
+</body>
+
+</html>

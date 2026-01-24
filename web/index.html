@@ -9,6 +9,17 @@
     <meta name="keywords" content="volleyball, streaming, remote control, live streaming, mobile streaming, sports">
     <meta name="author" content="VolleyBratans">
     <title>VolleyBratans Stream Platform</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/branding/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="VolleyBratans Stream Platform">
+    <meta property="og:description"
+        content="Unified dashboard for camera control, match statistics, and stream management">
+    <meta property="og:image" content="assets/branding/og-image.png">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="styles.css?v=7">
     <!-- Async Google Fonts Loading (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,11 +59,8 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand">
-                    <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
-                    </svg>
+                    <img src="assets/branding/logo-white.svg" alt="VolleyBratans" class="sidebar-logo" width="28"
+                        height="28">
                     <span class="sidebar-brand-text">VB Stream</span>
                 </div>
                 <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar [">
@@ -91,15 +99,14 @@
                         </svg>
                         <span class="sidebar-item-label">Live Scout</span>
                     </a>
-                    <a href="#matchday" class="sidebar-item" data-page="matchday">
+                    <a href="#scoreboard" class="sidebar-item" data-page="scoreboard">
                         <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
                         </svg>
-                        <span class="sidebar-item-label">Spieltag</span>
+                        <span class="sidebar-item-label">Scoreboard</span>
                     </a>
                 </div>
 
@@ -129,7 +136,7 @@
                         </svg>
                         <span class="sidebar-item-label">Hilfe</span>
                     </a>
-                    <a href="coach.html" class="sidebar-item sidebar-item-external" target="_blank">
+                    <a href="#coach" class="sidebar-item" data-page="coach">
                         <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -138,12 +145,15 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                         <span class="sidebar-item-label">Coach View</span>
-                        <svg class="sidebar-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    </a>
+                    <a href="#settings" class="sidebar-item" data-page="settings">
+                        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                            <polyline points="15 3 21 3 21 9" />
-                            <line x1="10" y1="14" x2="21" y2="3" />
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                         </svg>
+                        <span class="sidebar-item-label">Einstellungen</span>
                     </a>
                 </div>
             </nav>
@@ -290,6 +300,62 @@
                             </svg>
                             <span>Update Score</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Match Setup Widget -->
+                <div class="dashboard-section" id="matchSetupSection">
+                    <h2 class="dashboard-section-title">Match Setup</h2>
+                    <div class="match-setup-widget">
+                        <!-- Match Name & Date Row -->
+                        <div class="match-setup-row match-setup-meta">
+                            <div class="match-setup-field match-setup-name">
+                                <label class="form-label">Spielname</label>
+                                <input type="text" class="form-input" id="dashMatchName"
+                                    placeholder="z.B. Ligaspiel Runde 5">
+                            </div>
+                            <div class="match-setup-field match-setup-date">
+                                <label class="form-label">Datum</label>
+                                <input type="date" class="form-input" id="dashMatchDate">
+                            </div>
+                        </div>
+                        <!-- DVV Import Row -->
+                        <div class="match-setup-dvv">
+                            <input type="text" class="form-input" id="dashDvvLink"
+                                placeholder="DVV Ticker URL (https://dvv.sams-ticker.de/...)" aria-label="DVV Link">
+                            <button class="btn-base btn-primary-v btn-sm" id="dashDvvImport">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Import
+                            </button>
+                        </div>
+                        <!-- Teams Row -->
+                        <div class="match-setup-teams">
+                            <div class="match-setup-team">
+                                <label class="form-label">Heim</label>
+                                <input type="text" class="form-input" id="dashHomeTeam" placeholder="Heimmannschaft">
+                            </div>
+                            <div class="match-setup-vs">VS</div>
+                            <div class="match-setup-team">
+                                <label class="form-label">Gast</label>
+                                <input type="text" class="form-input" id="dashAwayTeam" placeholder="Gastmannschaft">
+                            </div>
+                        </div>
+                        <!-- Score Preview -->
+                        <div class="match-setup-score">
+                            <div class="match-setup-score-display">
+                                <span class="score-team" id="dashScoreHome">0</span>
+                                <span class="score-separator">:</span>
+                                <span class="score-team" id="dashScoreAway">0</span>
+                            </div>
+                            <span class="match-setup-set-label" id="dashCurrentSet">Satz 1</span>
+                        </div>
+                        <!-- Status Badge -->
+                        <div class="match-setup-status" id="dashMatchStatus"></div>
                     </div>
                 </div>
 
@@ -683,8 +749,9 @@
                 <!-- Match Header -->
                 <div class="scout-match-header">
                     <div class="scout-match-info">
-                        <input type="text" class="scout-match-input" id="scoutMatchName"
-                            placeholder="Spiel: z.B. TSG Tübingen vs Mads">
+                        <span class="scout-match-display" id="scoutMatchName" title="Konfiguriere im Dashboard">
+                            Spiel wird geladen...
+                        </span>
                         <span class="scout-match-date" id="scoutMatchDate"></span>
                     </div>
                     <div class="scout-match-actions">
@@ -862,125 +929,6 @@
                 </div>
             </section>
 
-            <!-- Page: Matchday -->
-            <section class="page" id="page-matchday">
-                <div class="page-header">
-                    <h1 class="page-title">Spieltag Konfiguration</h1>
-                    <p class="page-subtitle">Zentrale Verwaltung für Scoreboard, Scout und Overlays</p>
-                </div>
-
-                <div class="matchday-grid">
-                    <!-- DVV Helper Card -->
-                    <div class="matchday-card">
-                        <div class="matchday-card-header">
-                            <h2 class="matchday-card-title">
-                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                                </svg>
-                                DVV Integration
-                            </h2>
-                        </div>
-                        <div class="matchday-form-group">
-                            <label class="matchday-label">DVV Ticker / Stream Link</label>
-                            <div class="matchday-dvv-row">
-                                <input type="text" id="dvvLinkInput" class="matchday-input"
-                                    placeholder="https://dvv.sams-ticker.de/stream/...">
-                                <button id="importDvvBtn" class="btn-base btn-primary-v btn-sm">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                        <polyline points="7 10 12 15 17 10" />
-                                        <line x1="12" y1="15" x2="12" y2="3" />
-                                    </svg>
-                                    Laden
-                                </button>
-                            </div>
-                            <small class="text-muted text-sm mt-2 block">
-                                Importiert Teamnamen und Datum automatisch aus dem DVV Ticker.
-                            </small>
-                        </div>
-                        <div id="dvvStatus" class="hidden matchday-status-badge"></div>
-                    </div>
-
-                    <!-- Global Teams Card -->
-                    <div class="matchday-card">
-                        <div class="matchday-card-header">
-                            <h2 class="matchday-card-title">
-                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="2" y1="12" x2="22" y2="12" />
-                                    <path
-                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z" />
-                                </svg>
-                                Globale Teams
-                            </h2>
-                        </div>
-                        <div class="matchday-form-group">
-                            <label class="matchday-label">Heimmannschaft</label>
-                            <input type="text" id="globalHomeTeam" class="matchday-input"
-                                placeholder="z.B. Volley Bratans">
-                        </div>
-                        <div class="matchday-form-group">
-                            <label class="matchday-label">Gastmannschaft</label>
-                            <input type="text" id="globalAwayTeam" class="matchday-input" placeholder="z.B. Gegner VC">
-                        </div>
-                        <div class="matchday-teams-preview">
-                            <div class="matchday-team-display" id="previewHome">--</div>
-                            <div class="matchday-vs">VS</div>
-                            <div class="matchday-team-display" id="previewAway">--</div>
-                        </div>
-                    </div>
-
-                    <!-- Settings Card -->
-                    <div class="matchday-card">
-                        <div class="matchday-card-header">
-                            <h2 class="matchday-card-title">
-                                <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6" />
-                                    <line x1="8" y1="2" x2="8" y2="6" />
-                                    <line x1="3" y1="10" x2="21" y2="10" />
-                                </svg>
-                                Metadaten
-                            </h2>
-                        </div>
-                        <div class="matchday-form-group">
-                            <label class="matchday-label">Datum</label>
-                            <input type="date" id="matchDate" class="matchday-input">
-                        </div>
-                        <div class="matchday-form-group">
-                            <label class="matchday-label">Match ID (Optional)</label>
-                            <input type="text" id="matchId" class="matchday-input" placeholder="Autom. aus DVV Link"
-                                readonly>
-                        </div>
-                        <div class="matchday-form-group" style="margin-top: var(--space-6);">
-                            <button id="resetMatchdayBtn" class="btn-base btn-secondary-v btn-block"
-                                style="width: 100%;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 4 23 10 17 10" />
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                                </svg>
-                                Zurücksetzen
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="matchday-actions">
-                    <button id="saveMatchdayBtn" class="btn-base btn-primary-v btn-lg">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                            <polyline points="17 21 17 13 7 13 7 21" />
-                            <polyline points="7 3 7 8 15 8" />
-                        </svg>
-                        Alle Änderungen speichern
-                    </button>
-                </div>
-            </section>
-
             <!-- Page: Help -->
             <section class="page" id="page-help">
                 <div class="page-header">
@@ -1135,6 +1083,34 @@
                     </a>
                 </div>
             </section>
+            <!-- Page: Scoreboard -->
+            <section class="page" id="page-scoreboard">
+                <div class="page-header">
+                    <h1 class="page-title">Scoreboard Preview</h1>
+                    <p class="page-subtitle">Vorschau der OBS Overlays</p>
+                </div>
+                <div class="iframe-container" style="height: 300px; margin-bottom: 2rem;">
+                    <h3>Ticker Overlay</h3>
+                    <iframe src="overlay/ticker-overlay.html?theme=dark" class="embedded-frame"
+                        style="height: 120px;"></iframe>
+                </div>
+            </section>
+
+            <!-- Page: Coach -->
+            <section class="page" id="page-coach" style="height: calc(100vh - 40px); overflow: hidden; padding: 0;">
+                <iframe src="coach.html" class="embedded-frame" style="height: 100%; border-radius: 0;"></iframe>
+            </section>
+
+            <!-- Page: Settings -->
+            <section class="page" id="page-settings">
+                <div class="page-header">
+                    <h1 class="page-title">Einstellungen</h1>
+                    <p class="page-subtitle">Systemkonfiguration</p>
+                </div>
+                <div class="dashboard-section">
+                    <p>Hier können zukünftig System-Einstellungen vorgenommen werden.</p>
+                </div>
+            </section>
         </main>
 
         <!-- Add Profile Modal -->
@@ -1264,8 +1240,8 @@
         </div>
     </div>
     <script src="sidebar.js?v=1"></script>
-    <script src="matchday.js?v=1"></script>
-    <script src="app.js?v=3"></script>
+    <script src="match-state.js?v=1"></script>
+    <script src="app.js?v=4"></script>
     <script type="module" src="js/scout-main.js"></script>
     <script src="scout.legacy.js?v=1"></script>
     <script src="router.js?v=1"></script>
@@ -1303,6 +1279,7 @@
             });
         })();
     </script>
+    <script src="sams-ticker.js?v=1"></script>
     <script src="scoreboard.js?v=1"></script>
 </body>
 

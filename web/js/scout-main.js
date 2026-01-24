@@ -408,9 +408,27 @@ class ScoutEngineModular {
 
         this.elements.tableBody.addEventListener('click', (e) => {
             const target = e.target;
-            const action = target.dataset.action || target.closest('[data-action]')?.dataset.action;
             const row = target.closest('.scout-row');
             const playerId = row?.dataset.playerId;
+
+            // 1. FIRST: Check for Score Button clicks (highest priority)
+            const scoreBtn = target.closest('.scout-score-btn');
+            if (scoreBtn && playerId) {
+                const score = parseInt(scoreBtn.dataset.score);
+                const cellTd = scoreBtn.closest('td[data-element]');
+                const element = cellTd?.dataset.element;
+
+                if (element !== undefined) {
+                    this.state.addScore(playerId, element, score);
+                    this.render();
+                    this.state.saveLocal();
+                    this.syncToServer();
+                }
+                return; // Early return after handling score button
+            }
+
+            // 2. THEN: Handle action-based events
+            const action = target.dataset.action || target.closest('[data-action]')?.dataset.action;
 
             if (!playerId && !action) return;
 
@@ -449,21 +467,6 @@ class ScoutEngineModular {
                         this.showScoreHistoryModal(playerId, element);
                     }
                     break;
-            }
-
-            // Score button click
-            const scoreBtn = target.closest('.scout-score-btn');
-            if (scoreBtn) {
-                const score = parseInt(scoreBtn.dataset.score);
-                const cellTd = scoreBtn.closest('td[data-element]');
-                const element = cellTd?.dataset.element;
-
-                if (playerId && element !== undefined) {
-                    this.state.addScore(playerId, element, score);
-                    this.render();
-                    this.state.saveLocal();
-                    this.syncToServer();
-                }
             }
         });
     }

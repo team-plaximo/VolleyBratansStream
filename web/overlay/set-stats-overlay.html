@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volleybratans Satz-Statistiken Overlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=League+Gothic&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/branding/favicon.ico">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-red: #8B0000;
+            --blood-red: #A00000;
+            --black: #000000;
+            --dark-gray: #0a0a0a;
+            --text-white: #ffffff;
+            --border-red: rgba(139, 0, 0, 0.6);
+            --bg-black: rgba(0, 0, 0, 0.92);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes countUp {
+            0% {
+                opacity: 0;
+                transform: scale(1.3);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        body {
+            font-family: 'League Gothic', sans-serif;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .stats-card {
+            position: relative;
+            width: 420px;
+            background: var(--bg-black);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            animation: slideIn 0.6s ease-out;
+            border: 2px solid var(--border-red);
+            border-left: 4px solid var(--dark-red);
+        }
+
+        /* Top Border Accent */
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--dark-red);
+            z-index: 10;
+        }
+
+        .card-header {
+            position: relative;
+            background: rgba(10, 10, 10, 0.8);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-red);
+        }
+
+        .team-name {
+            font-family: 'League Gothic', sans-serif;
+            font-weight: 400;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-white);
+        }
+
+        .set-info {
+            font-family: 'League Gothic', sans-serif;
+            font-weight: 400;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffffff;
+            padding: 4px 12px;
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid var(--border-red);
+        }
+
+        #current-set {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin-left: 4px;
+        }
+
+        .stats-body {
+            padding: 0;
+        }
+
+        .stat-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.15);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .label-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .label {
+            font-family: 'League Gothic', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-white);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--dark-red);
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .value-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .value {
+            font-family: 'League Gothic', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 400;
+            color: var(--text-white);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .value.updated {
+            animation: countUp 0.4s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .stats-card {
+                width: 380px;
+            }
+        }
+
+        body.obs-mode {
+            background: transparent;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            color: var(--text-white);
+            opacity: 0.5;
+        }
+
+        .connection-status.connected {
+            color: #4ade80;
+        }
+
+        .connection-status.polling {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+
+<body class="obs-mode">
+    <div class="stats-card">
+        <div class="card-header">
+            <span class="team-name" id="team-name">VOLLEYBRATANS</span>
+            <span class="set-info">SATZ <span id="current-set">1</span></span>
+        </div>
+
+        <div class="stats-body">
+            <!-- Aufschlag -->
+            <div class="stat-row">
+                <div class="label-container">
+                    <span class="label">Aufschlag</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-serve" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="value-container">
+                    <span class="value" id="val-serve">0</span>
+                </div>
+            </div>
+
+            <!-- Annahme -->
+            <div class="stat-row">
+                <div class="label-container">
+                    <span class="label">Annahme</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-reception" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="value-container">
+                    <span class="value" id="val-reception">0</span>
+                </div>
+            </div>
+
+            <!-- Angriff -->
+            <div class="stat-row">
+                <div class="label-container">
+                    <span class="label">Angriff</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-attack" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="value-container">
+                    <span class="value" id="val-attack">0</span>
+                </div>
+            </div>
+
+            <!-- Block -->
+            <div class="stat-row">
+                <div class="label-container">
+                    <span class="label">Block</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-block" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="value-container">
+                    <span class="value" id="val-block">0</span>
+                </div>
+            </div>
+
+            <!-- Feldabwehr -->
+            <div class="stat-row">
+                <div class="label-container">
+                    <span class="label">Feldabwehr</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-defense" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="value-container">
+                    <span class="value" id="val-defense">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="connection-status" id="status">Initialisiere...</div>
+
+    <!-- Shared config -->
+    <script src="../config.js?v=1"></script>
+
+    <script>
+        /**
+         * Set-Stats Overlay (Dark Red Theme)
+         * Displays aggregated team statistics from ScoutState
+         * 
+         * URL Parameters:
+         * - set=1|2|3|4|5 : Filter by set (future enhancement)
+         * - set=total : Show all stats combined
+         */
+
+        // ============================================
+        // Configuration
+        // ============================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const config = {
+            set: urlParams.get('set') || null,
+            pollInterval: 2000 // 2 seconds
+        };
+
+        // Storage keys
+        const SCOUT_KEY = window.VB?.STORAGE_KEYS?.SCOUT || 'volleybratans_scout';
+        const MATCHDAY_KEY = window.VB?.STORAGE_KEYS?.MATCHDAY || 'volleybratans_matchday';
+
+        // Maximum values for progress bar calculation
+        const MAX_VALUES = {
+            serve: 20,
+            reception: 30,
+            attack: 40,
+            block: 15,
+            defense: 25
+        };
+
+        // Element mapping: overlay field → ScoutState element
+        const ELEMENT_MAP = {
+            serve: 'aufschlag',
+            reception: 'annahme',
+            attack: 'angriff',
+            block: 'block',
+            defense: 'feldabwehr'
+        };
+
+        let pollTimer = null;
+
+        // ============================================
+        // Initialization
+        // ============================================
+
+        function init() {
+            // Apply set from URL parameter
+            applySetFromUrl();
+
+            // Initial data load
+            loadData();
+
+            // Listen for localStorage changes (cross-tab sync)
+            window.addEventListener('storage', (e) => {
+                if (e.key === SCOUT_KEY || e.key === MATCHDAY_KEY) {
+                    loadData();
+                    updateStatus('connected', 'Live');
+                }
+            });
+
+            // Polling fallback
+            startPolling();
+
+            updateStatus('polling', 'Polling');
+        }
+
+        function applySetFromUrl() {
+            const setEl = document.getElementById('current-set');
+            if (config.set && config.set !== 'total') {
+                setEl.textContent = config.set;
+            } else if (config.set === 'total') {
+                setEl.textContent = 'Σ';
+            }
+            // If no set param, try to get from MatchState
+        }
+
+        // ============================================
+        // Data Loading
+        // ============================================
+
+        function loadData() {
+            try {
+                // Load scout data
+                const scoutData = loadScoutData();
+
+                // Load match data for team name and current set
+                const matchData = loadMatchData();
+
+                // Update display
+                if (matchData) {
+                    updateTeamAndSet(matchData);
+                }
+
+                if (scoutData && scoutData.players && scoutData.players.length > 0) {
+                    const stats = calculateStats(scoutData.players);
+                    updateStats(stats);
+                } else {
+                    // No data - show zeros
+                    updateStats({
+                        serve: 0,
+                        reception: 0,
+                        attack: 0,
+                        block: 0,
+                        defense: 0
+                    });
+                }
+
+            } catch (e) {
+                console.error('[SetStatsOverlay] Error loading data:', e);
+            }
+        }
+
+        function loadScoutData() {
+            try {
+                const stored = localStorage.getItem(SCOUT_KEY);
+                return stored ? JSON.parse(stored) : null;
+            } catch (e) {
+                console.error('[SetStatsOverlay] Scout data parse error:', e);
+                return null;
+            }
+        }
+
+        function loadMatchData() {
+            try {
+                const stored = localStorage.getItem(MATCHDAY_KEY);
+                return stored ? JSON.parse(stored) : null;
+            } catch (e) {
+                console.error('[SetStatsOverlay] Match data parse error:', e);
+                return null;
+            }
+        }
+
+        // ============================================
+        // Stats Calculation
+        // ============================================
+
+        /**
+         * Calculate stats by counting score === 3 (perfect/winning plays)
+         */
+        function calculateStats(players) {
+            const stats = {
+                serve: 0,
+                reception: 0,
+                attack: 0,
+                block: 0,
+                defense: 0
+            };
+
+            players.forEach(player => {
+                if (!player.scores) return;
+
+                Object.keys(ELEMENT_MAP).forEach(overlayKey => {
+                    const scoutElement = ELEMENT_MAP[overlayKey];
+                    const scores = player.scores[scoutElement] || [];
+                    // Count only "3" ratings (aces, kills, perfect passes, etc.)
+                    stats[overlayKey] += scores.filter(s => s === 3).length;
+                });
+            });
+
+            return stats;
+        }
+
+        // ============================================
+        // Display Updates
+        // ============================================
+
+        function updateTeamAndSet(matchData) {
+            // Team name
+            const teamEl = document.getElementById('team-name');
+            if (matchData.homeTeam && matchData.homeTeam !== 'Heim') {
+                teamEl.textContent = matchData.homeTeam.toUpperCase();
+            }
+
+            // Current set (if not overridden by URL param)
+            if (!config.set && matchData.currentSet) {
+                document.getElementById('current-set').textContent = matchData.currentSet;
+            }
+        }
+
+        function updateStats(stats) {
+            const fields = ['serve', 'reception', 'attack', 'block', 'defense'];
+
+            fields.forEach(field => {
+                const value = stats[field] || 0;
+                const valueElement = document.getElementById(`val-${field}`);
+                const progressElement = document.getElementById(`progress-${field}`);
+
+                if (!valueElement || !progressElement) return;
+
+                // Check if value changed
+                const oldValue = parseInt(valueElement.textContent) || 0;
+
+                if (value !== oldValue) {
+                    // Update value with animation
+                    valueElement.textContent = value;
+                    valueElement.classList.add('updated');
+                    setTimeout(() => valueElement.classList.remove('updated'), 400);
+                }
+
+                // Update progress bar
+                const percentage = Math.min((value / MAX_VALUES[field]) * 100, 100);
+                progressElement.style.width = `${percentage}%`;
+            });
+        }
+
+        function updateStatus(state, text) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = text;
+            statusEl.className = 'connection-status ' + state;
+        }
+
+        // ============================================
+        // Polling
+        // ============================================
+
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(() => {
+                loadData();
+            }, config.pollInterval);
+        }
+
+        // ============================================
+        // Public API (for debugging)
+        // ============================================
+
+        window.SetStatsOverlay = {
+            reload: loadData,
+            getConfig: () => config
+        };
+
+        // ============================================
+        // Start
+        // ============================================
+
+        init();
+    </script>
+</body>
+
+</html>

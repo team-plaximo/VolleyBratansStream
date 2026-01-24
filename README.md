@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/volleybratans logo.svg" alt="VolleyBratans" width="120">
+</p>
+
 # Moblin Remote Control
 
 A premium remote control interface for the Moblin mobile streaming app.

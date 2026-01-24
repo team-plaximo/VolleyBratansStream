@@ -1,11 +1,16 @@
 /**
  * Scoreboard Control Module
  * Manages live match score tracking for stream overlay integration
+ * 
+ * v2: Now integrated with central MatchState service for cross-module sync
  */
 
 class Scoreboard {
     constructor() {
-        // Use shared config if available, fallback for standalone usage
+        // Use MatchState as the source of truth if available
+        this.useMatchState = !!window.matchState;
+
+        // Fallback storage key for legacy mode
         this.STORAGE_KEY = window.VB?.STORAGE_KEYS?.SCOREBOARD || 'volleybratans_scoreboard';
 
         // DOM Elements
@@ -22,8 +27,12 @@ class Scoreboard {
             endSetBtn: document.getElementById('sbEndSet')
         };
 
-        // State
-        this.data = this.loadData();
+        // State - use MatchState if available
+        if (this.useMatchState) {
+            this.data = window.matchState.data;
+        } else {
+            this.data = this.loadData();
+        }
 
         // API Base - use shared getApiBase if available
         this.API_BASE = window.VB?.getApiBase ? window.VB.getApiBase() : this._getApiBaseFallback();
@@ -99,20 +108,38 @@ class Scoreboard {
             return;
         }
 
+        // Subscribe to MatchState changes if available
+        if (this.useMatchState) {
+            window.matchState.subscribe((data) => {
+                this.data = data;
+                this.render();
+            });
+        }
+
         // Set initial values
-        this.el.homeTeam.value = this.data.homeTeam;
-        this.el.awayTeam.value = this.data.awayTeam;
+        if (this.el.homeTeam) this.el.homeTeam.value = this.data.homeTeam || '';
+        if (this.el.awayTeam) this.el.awayTeam.value = this.data.awayTeam || '';
         this.render();
 
-        // Event Listeners
-        this.el.homeTeam.addEventListener('input', () => {
-            this.data.homeTeam = this.el.homeTeam.value;
-            this.saveData();
+        // Event Listeners for team name inputs
+        this.el.homeTeam?.addEventListener('input', () => {
+            const value = this.el.homeTeam.value;
+            if (this.useMatchState) {
+                window.matchState.update({ homeTeam: value });
+            } else {
+                this.data.homeTeam = value;
+                this.saveData();
+            }
         });
 
-        this.el.awayTeam.addEventListener('input', () => {
-            this.data.awayTeam = this.el.awayTeam.value;
-            this.saveData();
+        this.el.awayTeam?.addEventListener('input', () => {
+            const value = this.el.awayTeam.value;
+            if (this.useMatchState) {
+                window.matchState.update({ awayTeam: value });
+            } else {
+                this.data.awayTeam = value;
+                this.saveData();
+            }
         });
 
         // Point buttons
@@ -133,50 +160,63 @@ class Scoreboard {
         // End set button
         this.el.endSetBtn?.addEventListener('click', () => this.endSet());
 
-        console.log('[Scoreboard] Initialized');
+        console.log('[Scoreboard] Initialized' + (this.useMatchState ? ' (MatchState mode)' : ' (Legacy mode)'));
     }
 
     addPoint(team) {
-        if (team === 'home') {
-            this.data.homePoints++;
+        if (this.useMatchState) {
+            window.matchState.addPoint(team);
+            // Render is handled by subscription
         } else {
-            this.data.awayPoints++;
+            if (team === 'home') {
+                this.data.homePoints++;
+            } else {
+                this.data.awayPoints++;
+            }
+            this.saveData();
+            this.render();
         }
-        this.saveData();
-        this.render();
     }
 
     subPoint(team) {
-        if (team === 'home' && this.data.homePoints > 0) {
-            this.data.homePoints--;
-        } else if (team === 'away' && this.data.awayPoints > 0) {
-            this.data.awayPoints--;
+        if (this.useMatchState) {
+            window.matchState.subPoint(team);
+            // Render is handled by subscription
+        } else {
+            if (team === 'home' && this.data.homePoints > 0) {
+                this.data.homePoints--;
+            } else if (team === 'away' && this.data.awayPoints > 0) {
+                this.data.awayPoints--;
+            }
+            this.saveData();
+            this.render();
         }
-        this.saveData();
-        this.render();
     }
 
     endSet() {
-        // Add current set to history
-        this.data.setHistory.push({
-            home: this.data.homePoints,
-            away: this.data.awayPoints
-        });
-
-        // Update set scores
-        if (this.data.homePoints > this.data.awayPoints) {
-            this.data.homeSets++;
+        if (this.useMatchState) {
+            window.matchState.endSet();
+            // Render is handled by subscription
         } else {
-            this.data.awaySets++;
+            // Legacy mode: manage locally
+            this.data.setHistory.push({
+                home: this.data.homePoints,
+                away: this.data.awayPoints
+            });
+
+            if (this.data.homePoints > this.data.awayPoints) {
+                this.data.homeSets++;
+            } else {
+                this.data.awaySets++;
+            }
+
+            this.data.homePoints = 0;
+            this.data.awayPoints = 0;
+            this.data.currentSet++;
+
+            this.saveData();
+            this.render();
         }
-
-        // Reset points for new set
-        this.data.homePoints = 0;
-        this.data.awayPoints = 0;
-        this.data.currentSet++;
-
-        this.saveData();
-        this.render();
     }
 
     reset() {

@@ -298,7 +298,7 @@ class ScoutEngine {
         this.tableBody = document.getElementById('scoutTableBody');
         this.tableFoot = document.getElementById('scoutTableFoot');
         this.emptyState = document.getElementById('scoutEmptyState');
-        this.matchNameInput = document.getElementById('scoutMatchName');
+        this.matchNameEl = document.getElementById('scoutMatchName');
         this.matchDateSpan = document.getElementById('scoutMatchDate');
 
         // Summary elements
@@ -312,15 +312,8 @@ class ScoutEngine {
             return;
         }
 
-        // Set initial values
-        this.matchNameInput.value = this.data.matchName;
-        this.matchDateSpan.textContent = this.formatDate(this.data.matchDate);
-
-        // Event Listeners
-        this.matchNameInput.addEventListener('input', () => {
-            this.data.matchName = this.matchNameInput.value;
-            this.saveData();
-        });
+        // Subscribe to MatchState for match name/date (source of truth is Dashboard)
+        this.initMatchStateSync();
 
         document.getElementById('scoutAddPlayer')?.addEventListener('click', () => this.showImportModal());
         document.getElementById('scoutAddPlayerEmpty')?.addEventListener('click', () => this.showImportModal());
@@ -341,6 +334,53 @@ class ScoutEngine {
 
         // Initialize drag and drop for player reordering
         this.initDragAndDrop();
+    }
+
+    /**
+     * Subscribe to MatchState updates for match name/date display
+     * Source of Truth: Dashboard > MatchState > Scout (read-only)
+     */
+    initMatchStateSync() {
+        if (!window.matchState) {
+            console.log('[Scout] MatchState not available, using local data');
+            // Fallback: show local data
+            if (this.matchNameEl) {
+                this.matchNameEl.textContent = this.data.matchName || 'Spielname nicht konfiguriert';
+            }
+            if (this.matchDateSpan) {
+                this.matchDateSpan.textContent = this.formatDate(this.data.matchDate);
+            }
+            return;
+        }
+
+        // Subscribe to matchstate:updated DOM event
+        document.addEventListener('matchstate:updated', (e) => {
+            this.syncFromMatchState(e.detail);
+        });
+
+        // Initial sync from current matchState data
+        this.syncFromMatchState(window.matchState.data);
+    }
+
+    /**
+     * Sync match display from MatchState data
+     * @param {Object} matchData - MatchState data object
+     */
+    syncFromMatchState(matchData) {
+        // Build display name: prefer matchName, fallback to "Team vs Team"
+        const displayName = matchData.matchName ||
+            `${matchData.homeTeam || 'Heim'} vs ${matchData.awayTeam || 'Gast'}`;
+
+        if (this.matchNameEl) {
+            this.matchNameEl.textContent = displayName;
+        }
+        if (this.matchDateSpan) {
+            this.matchDateSpan.textContent = this.formatDate(matchData.date);
+        }
+
+        // Sync to local scout data for export compatibility
+        this.data.matchName = displayName;
+        this.data.matchDate = matchData.date;
     }
 
     formatDate(dateStr) {

@@ -1726,4 +1726,154 @@ class MoblinMultiRemote {
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     window.moblinMultiRemote = new MoblinMultiRemote();
+
+    // Initialize Match Setup Widget Controller
+    setupMatchWidget();
 });
+
+// ============================================
+// Match Setup Widget Controller (Dashboard)
+// ============================================
+function setupMatchWidget() {
+    const el = {
+        matchName: document.getElementById('dashMatchName'),
+        matchDate: document.getElementById('dashMatchDate'),
+        dvvLink: document.getElementById('dashDvvLink'),
+        dvvImport: document.getElementById('dashDvvImport'),
+        homeTeam: document.getElementById('dashHomeTeam'),
+        awayTeam: document.getElementById('dashAwayTeam'),
+        scoreHome: document.getElementById('dashScoreHome'),
+        scoreAway: document.getElementById('dashScoreAway'),
+        currentSet: document.getElementById('dashCurrentSet'),
+        status: document.getElementById('dashMatchStatus')
+    };
+
+    // Exit if not on Dashboard page or elements don't exist
+    if (!el.homeTeam || !window.matchState) {
+        console.log('[MatchSetup] Widget not found or MatchState not available');
+        return;
+    }
+
+    const state = window.matchState;
+
+    /**
+     * Render current state to UI
+     * @param {Object} data - MatchState data
+     */
+    const render = (data) => {
+        if (el.matchName) el.matchName.value = data.matchName || '';
+        if (el.matchDate) el.matchDate.value = data.date || '';
+        if (el.dvvLink) el.dvvLink.value = data.dvvLink || '';
+        if (el.homeTeam) el.homeTeam.value = data.homeTeam || '';
+        if (el.awayTeam) el.awayTeam.value = data.awayTeam || '';
+        if (el.scoreHome) el.scoreHome.textContent = data.homePoints || 0;
+        if (el.scoreAway) el.scoreAway.textContent = data.awayPoints || 0;
+        if (el.currentSet) el.currentSet.textContent = `Satz ${data.currentSet || 1}`;
+    };
+
+    // Subscribe to state changes
+    state.subscribe(render);
+
+    // Input handlers with debounce
+    let saveTimeout = null;
+    const debouncedSave = (field, value) => {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            state.update({ [field]: value });
+        }, 300);
+    };
+
+    el.matchName?.addEventListener('input', (e) => {
+        debouncedSave('matchName', e.target.value.trim());
+    });
+
+    el.matchDate?.addEventListener('change', (e) => {
+        state.update({ date: e.target.value });
+    });
+
+    el.homeTeam?.addEventListener('input', (e) => {
+        debouncedSave('homeTeam', e.target.value.trim() || 'Heim');
+    });
+
+    el.awayTeam?.addEventListener('input', (e) => {
+        debouncedSave('awayTeam', e.target.value.trim() || 'Gast');
+    });
+
+    // DVV Import handler - Uses client-side SamsTickerService
+    el.dvvImport?.addEventListener('click', async () => {
+        const url = el.dvvLink?.value.trim();
+        if (!url) {
+            showStatus('Bitte Link eingeben', 'error');
+            return;
+        }
+
+        // Extract match ID from DVV URL (format: .../stream/UUID or .../detail/UUID)
+        const matchIdMatch = url.match(/(?:stream|detail)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+        if (!matchIdMatch) {
+            showStatus('Ungültiger DVV-Link', 'error');
+            return;
+        }
+
+        const matchId = matchIdMatch[1];
+        el.dvvImport.disabled = true;
+        showStatus('Laden...', '');
+
+        try {
+            // Check if SamsTickerService is available
+            if (typeof SamsTickerService === 'undefined') {
+                throw new Error('SamsTickerService nicht geladen');
+            }
+
+            // Use client-side SamsTickerService to fetch match data
+            const ticker = new SamsTickerService(matchId);
+            const matches = await ticker.getAvailableMatches();
+            const matchData = matches.find(m => m.id === matchId);
+
+            if (!matchData) {
+                throw new Error('Spiel nicht gefunden in SAMS');
+            }
+
+            // Update matchState with fetched data
+            state.update({
+                dvvLink: url,
+                matchId: matchId,
+                homeTeam: matchData.home || state.data.homeTeam,
+                awayTeam: matchData.away || state.data.awayTeam,
+                date: matchData.date || state.data.date
+            });
+
+            showStatus(`${matchData.home} vs ${matchData.away} ✓`, 'success');
+            console.log('[MatchSetup] DVV Import successful:', matchData);
+
+        } catch (e) {
+            console.error('[MatchSetup] DVV Import error:', e);
+            showStatus(e.message || 'Import fehlgeschlagen', 'error');
+        } finally {
+            el.dvvImport.disabled = false;
+        }
+    });
+
+    /**
+     * Show status message
+     * @param {string} message
+     * @param {'success' | 'error' | ''} type
+     */
+    function showStatus(message, type) {
+        if (!el.status) return;
+        el.status.textContent = message;
+        el.status.className = 'match-setup-status';
+        if (type) {
+            el.status.classList.add(type);
+        }
+
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                el.status.textContent = '';
+                el.status.className = 'match-setup-status';
+            }, 3000);
+        }
+    }
+
+    console.log('[MatchSetup] Widget initialized');
+}
